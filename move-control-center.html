@@ -1330,7 +1330,8 @@
       document.getElementById('budget').value = Number(state.budget || 0);
       document.getElementById('projectName').value = state.projectName || '';
       document.getElementById('notes').value = state.notes || '';
-      document.getElementById('shareBaseUrl').value = state.shareBaseUrl || '';
+      const autoShareBase = location.protocol.startsWith('http') ? `${location.origin}${location.pathname}` : '';
+      document.getElementById('shareBaseUrl').value = state.shareBaseUrl || autoShareBase || '';
       document.title = `${state.projectName || '引っ越しプランナー'} | 平面図で家具配置`;
     }
 
