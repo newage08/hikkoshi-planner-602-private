@@ -453,6 +453,107 @@
       gap: 8px;
     }
 
+    .live-panel {
+      margin-top: 10px;
+      border: 1px solid #dbe3ee;
+      border-radius: 12px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .live-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .live-tools {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .live-tools select {
+      min-width: 220px;
+      width: auto;
+      max-width: 100%;
+      font-size: 12px;
+      padding: 7px 9px;
+    }
+
+    .live-stage {
+      position: relative;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #0f172a;
+      aspect-ratio: 16 / 10;
+    }
+
+    .live-stage img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .live-overlay {
+      position: absolute;
+      inset: 0;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .live-item {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      border: 1px solid rgba(15,23,42,.45);
+      border-radius: 8px;
+      padding: 3px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #0f172a;
+      cursor: grab;
+      box-shadow: 0 6px 16px rgba(15,23,42,.18);
+      background: #ffffffd6;
+      backdrop-filter: blur(2px);
+      white-space: nowrap;
+    }
+
+    .live-item::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -6px;
+      width: 1px;
+      height: 6px;
+      background: rgba(15,23,42,.45);
+      transform: translateX(-50%);
+    }
+
+    .live-item.selected {
+      outline: 2px solid #0f172a;
+      outline-offset: 1px;
+      z-index: 4;
+    }
+
+    .live-item:active {
+      cursor: grabbing;
+    }
+
+    .live-item-size {
+      margin-left: 4px;
+      font-weight: 600;
+      opacity: .8;
+    }
+
     .photo-card {
       border: 1px solid #dbe3ee;
       border-radius: 10px;
@@ -643,6 +744,21 @@
             <button class="btn" data-room="bedroom">寝室</button>
             <button class="btn" data-room="roof">ルーフバルコニー</button>
           </div>
+
+          <div class="live-panel">
+            <div class="live-head">
+              <div class="mini">実写プレビュー（マーカーをドラッグで微調整）</div>
+              <div class="live-tools">
+                <select id="livePhotoSelect"></select>
+                <button class="btn" id="resetLiveNudges">補正リセット</button>
+              </div>
+            </div>
+            <div class="live-stage" id="liveStage">
+              <img id="liveStageImage" alt="実写プレビュー" loading="lazy" />
+              <div class="live-overlay" id="liveOverlay"></div>
+            </div>
+          </div>
+
           <div class="photo-grid" id="photoGrid"></div>
         </div>
       </div>
@@ -795,7 +911,19 @@
         { name: '旧ベッド', size: '要計測', fee: 0, status: '未予約', date: '' }
       ],
       tasksDone: {},
-      tasksExtra: []
+      tasksExtra: [],
+      photoScene: {
+        imageByRoom: {
+          living: './assets/photos/living/living-real-room-reference.jpeg',
+          bedroom: './assets/photos/bedroom/bedroom-main.jpeg',
+          roof: './assets/photos/balcony/balcony-view-1.jpeg'
+        },
+        nudges: {
+          living: {},
+          bedroom: {},
+          roof: {}
+        }
+      }
     };
 
     const baseTasks = [
@@ -823,11 +951,18 @@
       roof: zones.roof
     };
 
+    const liveFloorPresets = {
+      living: { p00: { x: 0.18, y: 0.90 }, p10: { x: 0.86, y: 0.90 }, p01: { x: 0.42, y: 0.58 }, p11: { x: 0.74, y: 0.58 } },
+      bedroom: { p00: { x: 0.10, y: 0.92 }, p10: { x: 0.92, y: 0.92 }, p01: { x: 0.30, y: 0.60 }, p11: { x: 0.72, y: 0.60 } },
+      roof: { p00: { x: 0.10, y: 0.95 }, p10: { x: 0.92, y: 0.95 }, p01: { x: 0.24, y: 0.63 }, p11: { x: 0.78, y: 0.63 } }
+    };
+
     let worldExt = { minX: 0, maxX: 317, minZ: 0, maxZ: 1176 };
 
     const photos = [
       { room: 'plan', src: './assets/photos/plan/handwritten-plan.jpeg', cap: '手書き間取り（採寸メモ入り）' },
 
+      { room: 'living', src: './assets/photos/living/living-real-room-reference.jpeg', cap: 'リビング実写イメージ（参考）' },
       { room: 'living', src: './assets/photos/living/living-wide-1.jpeg', cap: 'リビング全景1（壁面）' },
       { room: 'living', src: './assets/photos/living/living-wide-2.jpeg', cap: 'リビング全景2（窓向き）' },
       { room: 'living', src: './assets/photos/living/living-wide-3.jpeg', cap: 'リビング全景3（奥行き確認）' },
@@ -851,6 +986,7 @@
     let photoRoomFilter = state.activeRoom || 'living';
     let planFocus = false;
     let drag = null;
+    let liveDrag = null;
     let renderCache = { dpr: 1, scale: 1, ox: 0, oy: 0, width: 0, height: 0 };
 
     function getCSS(name) {
@@ -870,6 +1006,21 @@
       });
 
       const activeRoom = ['living', 'bedroom', 'roof'].includes(data.activeRoom) ? data.activeRoom : 'living';
+      const srcScene = data.photoScene || {};
+      const srcImageByRoom = srcScene.imageByRoom || {};
+      const srcNudges = srcScene.nudges || {};
+      const photoScene = {
+        imageByRoom: {
+          living: srcImageByRoom.living || defaultState.photoScene.imageByRoom.living,
+          bedroom: srcImageByRoom.bedroom || defaultState.photoScene.imageByRoom.bedroom,
+          roof: srcImageByRoom.roof || defaultState.photoScene.imageByRoom.roof
+        },
+        nudges: {
+          living: { ...(srcNudges.living || {}) },
+          bedroom: { ...(srcNudges.bedroom || {}) },
+          roof: { ...(srcNudges.roof || {}) }
+        }
+      };
 
       return {
         ...clone(defaultState),
@@ -879,7 +1030,8 @@
         money: data.money || clone(defaultState.money),
         dispose: data.dispose || clone(defaultState.dispose),
         tasksDone: data.tasksDone || {},
-        tasksExtra: data.tasksExtra || []
+        tasksExtra: data.tasksExtra || [],
+        photoScene
       };
     }
 
@@ -967,6 +1119,69 @@
         minZ: Math.max(0, z.z - pad),
         maxZ: z.z + z.d + pad
       };
+    }
+
+    function ensurePhotoScene() {
+      if (!state.photoScene) state.photoScene = clone(defaultState.photoScene);
+      if (!state.photoScene.imageByRoom) state.photoScene.imageByRoom = clone(defaultState.photoScene.imageByRoom);
+      if (!state.photoScene.nudges) state.photoScene.nudges = { living: {}, bedroom: {}, roof: {} };
+      if (!state.photoScene.nudges.living) state.photoScene.nudges.living = {};
+      if (!state.photoScene.nudges.bedroom) state.photoScene.nudges.bedroom = {};
+      if (!state.photoScene.nudges.roof) state.photoScene.nudges.roof = {};
+    }
+
+    function getRoomPhotos(roomKey) {
+      return photos.filter((p) => p.room === roomKey);
+    }
+
+    function getLivePhotoForRoom(roomKey) {
+      ensurePhotoScene();
+      const list = getRoomPhotos(roomKey);
+      if (!list.length) return '';
+      const saved = state.photoScene.imageByRoom[roomKey];
+      if (saved && list.some((p) => p.src === saved)) return saved;
+      return list[0].src;
+    }
+
+    function getLiveNudge(roomKey, itemId) {
+      ensurePhotoScene();
+      return state.photoScene.nudges[roomKey]?.[itemId] || { dx: 0, dy: 0 };
+    }
+
+    function setLiveNudge(roomKey, itemId, dx, dy) {
+      ensurePhotoScene();
+      if (!state.photoScene.nudges[roomKey]) state.photoScene.nudges[roomKey] = {};
+      state.photoScene.nudges[roomKey][itemId] = {
+        dx: Math.max(-0.5, Math.min(0.5, dx)),
+        dy: Math.max(-0.5, Math.min(0.5, dy))
+      };
+    }
+
+    function bilinearPoint(c, u, v) {
+      const x =
+        c.p00.x * (1 - u) * (1 - v) +
+        c.p10.x * u * (1 - v) +
+        c.p01.x * (1 - u) * v +
+        c.p11.x * u * v;
+      const y =
+        c.p00.y * (1 - u) * (1 - v) +
+        c.p10.y * u * (1 - v) +
+        c.p01.y * (1 - u) * v +
+        c.p11.y * u * v;
+      return { x, y };
+    }
+
+    function projectToLiveStage(roomKey, item) {
+      const zone = zones[roomKey];
+      const c = liveFloorPresets[roomKey] || liveFloorPresets.living;
+      const cx = item.x + item.w / 2;
+      const cz = item.z + item.d / 2;
+      const uRaw = (cx - zone.x) / zone.w;
+      const vRaw = (cz - zone.z) / zone.d;
+      const u = Math.max(0, Math.min(1, uRaw));
+      const v = Math.max(0, Math.min(1, vRaw));
+      const p = bilinearPoint(c, u, v);
+      return { u, v, x: p.x, y: p.y };
     }
 
     function formatYen(v) {
@@ -1336,6 +1551,53 @@
       `).join('');
     }
 
+    function renderLiveScene() {
+      ensurePhotoScene();
+      const roomKey = getActiveRoomKey();
+      const list = getRoomPhotos(roomKey);
+      const select = document.getElementById('livePhotoSelect');
+      const img = document.getElementById('liveStageImage');
+      const overlay = document.getElementById('liveOverlay');
+      const stage = document.getElementById('liveStage');
+      if (!select || !img || !overlay || !stage) return;
+
+      if (!list.length) {
+        select.innerHTML = '';
+        overlay.innerHTML = '';
+        return;
+      }
+
+      const currentSrc = getLivePhotoForRoom(roomKey);
+      select.innerHTML = list.map((p) => `<option value="${p.src}">${escapeHtml(p.cap)}</option>`).join('');
+      select.value = list.some((p) => p.src === currentSrc) ? currentSrc : list[0].src;
+      const resolvedSrc = select.value || list[0].src;
+      if (img.dataset.src !== resolvedSrc) {
+        img.src = resolvedSrc;
+        img.dataset.src = resolvedSrc;
+      }
+
+      const stageRect = stage.getBoundingClientRect();
+      const stageW = Math.max(1, stageRect.width);
+      const stageH = Math.max(1, stageRect.height);
+      const roomItems = getRoomItemsWithIndex(roomKey);
+
+      overlay.innerHTML = roomItems.map(({ item, idx }) => {
+        const p = projectToLiveStage(roomKey, item);
+        const n = getLiveNudge(roomKey, item.id);
+        const left = (p.x + n.dx) * 100;
+        const top = (p.y + n.dy) * 100;
+        const depthScale = Math.max(0.55, 1.2 - p.v * 0.7);
+        const chipW = Math.max(56, Math.min(170, ((item.w / zones[roomKey].w) * stageW * 0.52 + 30) * depthScale));
+        const isSelected = idx === selectedIndex;
+        return `
+          <div class="live-item ${isSelected ? 'selected' : ''}" data-id="${item.id}" data-idx="${idx}"
+               style="left:${left}%;top:${top}%;background:${item.color}d9;min-width:${chipW.toFixed(1)}px;">
+            ${escapeHtml(item.name)}<span class="live-item-size">${Math.round(item.w)}x${Math.round(item.d)}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
     function renderPhotos() {
       const grid = document.getElementById('photoGrid');
       if (!grid) return;
@@ -1402,6 +1664,7 @@
       renderMoney();
       renderDispose();
       renderTimeline();
+      renderLiveScene();
       renderPhotos();
       renderCards();
       renderTop();
@@ -1485,6 +1748,7 @@
         drawPlan();
         updateInspector();
         renderItemTable();
+        renderLiveScene();
       });
 
       function endDrag(e) {
@@ -1497,6 +1761,74 @@
 
       canvas.addEventListener('pointerup', endDrag);
       canvas.addEventListener('pointercancel', endDrag);
+    }
+
+    function bindLiveScene() {
+      const select = document.getElementById('livePhotoSelect');
+      const resetBtn = document.getElementById('resetLiveNudges');
+      const overlay = document.getElementById('liveOverlay');
+      const stage = document.getElementById('liveStage');
+      if (!select || !resetBtn || !overlay || !stage) return;
+
+      select.addEventListener('change', () => {
+        const roomKey = getActiveRoomKey();
+        ensurePhotoScene();
+        state.photoScene.imageByRoom[roomKey] = select.value;
+        saveState();
+        renderLiveScene();
+      });
+
+      resetBtn.addEventListener('click', () => {
+        const roomKey = getActiveRoomKey();
+        ensurePhotoScene();
+        state.photoScene.nudges[roomKey] = {};
+        saveState();
+        renderLiveScene();
+      });
+
+      overlay.addEventListener('pointerdown', (e) => {
+        const node = e.target.closest('.live-item[data-id]');
+        if (!node) return;
+        const idx = Number(node.dataset.idx);
+        if (Number.isFinite(idx)) selectItem(idx);
+
+        const roomKey = getActiveRoomKey();
+        const itemId = node.dataset.id;
+        const n = getLiveNudge(roomKey, itemId);
+        liveDrag = {
+          pointerId: e.pointerId,
+          roomKey,
+          itemId,
+          sx: e.clientX,
+          sy: e.clientY,
+          dx: n.dx,
+          dy: n.dy
+        };
+        overlay.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+
+      overlay.addEventListener('pointermove', (e) => {
+        if (!liveDrag) return;
+        if (e.pointerId !== liveDrag.pointerId) return;
+        const rect = stage.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+
+        const ndx = liveDrag.dx + (e.clientX - liveDrag.sx) / rect.width;
+        const ndy = liveDrag.dy + (e.clientY - liveDrag.sy) / rect.height;
+        setLiveNudge(liveDrag.roomKey, liveDrag.itemId, ndx, ndy);
+        renderLiveScene();
+      });
+
+      function endLiveDrag(e) {
+        if (!liveDrag) return;
+        if (e.pointerId !== liveDrag.pointerId) return;
+        saveState();
+        liveDrag = null;
+      }
+
+      overlay.addEventListener('pointerup', endLiveDrag);
+      overlay.addEventListener('pointercancel', endLiveDrag);
     }
 
     function bindUI() {
@@ -1733,10 +2065,12 @@
       window.addEventListener('resize', () => {
         setCanvasSize();
         drawPlan();
+        renderLiveScene();
       });
     }
 
     bindCanvas();
+    bindLiveScene();
     bindUI();
     renderAll();
   </script>
