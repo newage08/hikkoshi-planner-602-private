@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>引っ越しプランナー | 平面図で家具配置</title>
+  <title>Move Board 602</title>
   <style>
     :root {
       --ink: #0f172a;
@@ -188,9 +188,7 @@
     }
 
     .card .sub {
-      margin-top: 3px;
-      color: #475569;
-      font-size: 11px;
+      display: none;
     }
 
     .tabs {
@@ -518,16 +516,14 @@
   <div class="wrap">
     <div class="top">
       <section class="panel hero">
-        <h1>引っ越しプランナー</h1>
-        <p>3D表示は停止し、<strong>真上の平面図</strong>で寸法チェックに特化。ゾーンは「リビング / 寝室 / ルーフバルコニー」の3つだけに絞っています。</p>
+        <h1>Move Board 602</h1>
         <div class="hero-row">
           <span class="chip">ル・リオン東京 602</span>
           <span class="chip">リビング 494 x 310 cm</span>
           <span class="chip">寝室 238 x 216 cm</span>
           <span class="chip">ルーフバルコニー 140 x 350 cm</span>
-          <span class="chip">ベッドは寝室のみ</span>
-          <button class="btn" id="openLegacy3d">旧3Dページを開く</button>
-          <button class="btn" id="jumpShare">共有リンク作成へ</button>
+          <button class="btn" id="openLegacy3d">旧3D</button>
+          <button class="btn" id="jumpShare">共有</button>
         </div>
       </section>
 
@@ -551,24 +547,23 @@
     <section class="cards" id="cards"></section>
 
     <section class="tabs" id="tabs">
-      <button class="tab active" data-tab="plan">平面図で配置</button>
-      <button class="tab" data-tab="money">費用管理</button>
-      <button class="tab" data-tab="dispose">捨てるリスト</button>
-      <button class="tab" data-tab="schedule">スケジュール</button>
-      <button class="tab" data-tab="notes">メモ保存</button>
+      <button class="tab active" data-tab="plan">配置</button>
+      <button class="tab" data-tab="money">費用</button>
+      <button class="tab" data-tab="dispose">処分</button>
+      <button class="tab" data-tab="schedule">予定</button>
+      <button class="tab" data-tab="notes">共有</button>
     </section>
 
     <section id="sec-plan" class="section active">
       <div class="panel block">
-        <h2>真上の平面図（ドラッグ配置）</h2>
-        <p class="muted">家具をドラッグして配置。右側で座標・寸法の微調整も可能。<strong>重なり</strong>と<strong>部屋外はみ出し</strong>を自動検出します。部屋モードを切り替えると、その部屋だけを大きく編集できます。</p>
+        <h2>平面図</h2>
 
         <div class="room-scope" id="roomScope">
-          <span class="muted" style="margin-right:4px;">編集する部屋:</span>
+          <span class="muted" style="margin-right:4px;">部屋:</span>
           <button class="btn active" data-room-scope="living">リビング</button>
           <button class="btn" data-room-scope="bedroom">寝室</button>
           <button class="btn" data-room-scope="roof">ルーフバルコニー</button>
-          <button class="btn" id="togglePlanFocus">平面図を最大化</button>
+          <button class="btn" id="togglePlanFocus">最大化</button>
         </div>
 
         <div class="plan-layout">
@@ -641,8 +636,7 @@
         </div>
 
         <div style="margin-top:12px;">
-          <h2 style="font-size:15px;">写真ダブルチェック（部屋ごと）</h2>
-          <p class="muted">配置の最終確認と部屋の雰囲気合わせ用。部屋を切り替えて見比べできます。</p>
+          <h2 style="font-size:15px;">写真</h2>
           <div class="photo-tools" id="photoFilters">
             <button class="btn" data-room="plan">間取り</button>
             <button class="btn active" data-room="living">リビング</button>
@@ -657,7 +651,6 @@
     <section id="sec-money" class="section">
       <div class="panel block">
         <h2>費用管理</h2>
-        <p class="muted">確定・検討中・未定を分けて管理。見積が出たら金額を直接更新。</p>
         <div style="overflow:auto;">
           <table class="tbl" id="moneyTable">
             <thead>
@@ -731,7 +724,7 @@
 
     <section id="sec-notes" class="section">
       <div class="panel block">
-        <h2>共有 / メモ保存 / バックアップ</h2>
+        <h2>共有・メモ</h2>
         <div class="row2">
           <div>
             <label for="notes">統合メモ</label>
@@ -741,24 +734,23 @@
             </div>
           </div>
           <div>
-            <label for="shareBaseUrl">共有用の公開URL（あなたが公開したURL）</label>
+            <label for="shareBaseUrl">公開URL</label>
             <input id="shareBaseUrl" type="text" placeholder="例: https://example.pages.dev/move-control-center.html" />
             <div class="share-box">
-              <div class="muted">共有リンクを作ると、今の配置/費用/タスク状態を彼女側でも同じ画面で再現できます。</div>
+              <div class="muted">同じ状態を共有できます。</div>
               <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn primary" id="buildShareLink">共有リンク生成</button>
-                <button class="btn" id="copyShareLink">リンクをコピー</button>
+                <button class="btn primary" id="buildShareLink">リンク作成</button>
+                <button class="btn" id="copyShareLink">コピー</button>
               </div>
               <input id="shareLink" class="share-link" readonly value="" />
             </div>
 
-            <label style="margin-top:10px;">JSONバックアップ</label>
+            <label style="margin-top:10px;">バックアップ</label>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <button class="btn" id="exportJson">JSONを書き出し</button>
               <label class="btn" for="importJson">JSONを読み込み</label>
               <input id="importJson" type="file" accept="application/json" style="display:none;" />
             </div>
-            <p class="footer">このページは端末内保存を使います。JSONを使うと別端末でも同じ状態を再現できます。</p>
           </div>
         </div>
       </div>
@@ -1332,7 +1324,7 @@
           <div class="date">${t.due?toDateLabel(t.due):'日付未設定'}</div>
           <div>
             <div style="font-weight:700;">${escapeHtml(t.title)}</div>
-            <div class="muted">担当: ${escapeHtml(t.owner||'自分')} ${t.custom?'<span class="pill">追加</span>':''}</div>
+            ${t.custom?'<div class="muted"><span class="pill">追加</span></div>':''}
           </div>
           <div style="display:flex;gap:6px;align-items:center;justify-content:flex-end;">
             <label style="margin:0;display:flex;gap:4px;align-items:center;font-size:11px;color:#334155;">
@@ -1396,9 +1388,9 @@
       const focusBtn = document.getElementById('togglePlanFocus');
       if (focusBtn) {
         focusBtn.classList.toggle('active', planFocus);
-        focusBtn.textContent = planFocus ? '通常表示に戻す' : '平面図を最大化';
+        focusBtn.textContent = planFocus ? '戻す' : '最大化';
       }
-      document.title = `${state.projectName || '引っ越しプランナー'} | 平面図で家具配置`;
+      document.title = `${state.projectName || 'Move Board 602'}`;
     }
 
     function renderAll() {
@@ -1420,7 +1412,7 @@
       const layout = document.querySelector('.plan-layout');
       if (layout) layout.classList.toggle('focus-canvas', planFocus);
       const btn = document.getElementById('togglePlanFocus');
-      if (btn) btn.textContent = planFocus ? '通常表示に戻す' : '平面図を最大化';
+      if (btn) btn.textContent = planFocus ? '戻す' : '最大化';
       setCanvasSize();
       drawPlan();
     }
@@ -1673,7 +1665,7 @@
 
       document.getElementById('buildShareLink').addEventListener('click', () => {
         const link = buildShareLinkValue();
-        document.getElementById('shareLink').value = link || 'まず公開URLを入力してください（file:// のままでは共有不可）';
+        document.getElementById('shareLink').value = link || '公開URLを入力';
       });
 
       document.getElementById('copyShareLink').addEventListener('click', async () => {
