@@ -238,8 +238,16 @@
 
     .plan-layout {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 360px;
+      grid-template-columns: minmax(0, 1fr) 320px;
       gap: 10px;
+    }
+
+    .plan-layout.focus-canvas {
+      grid-template-columns: 1fr;
+    }
+
+    .plan-layout.focus-canvas .inspector {
+      display: none;
     }
 
     .room-scope {
@@ -275,9 +283,9 @@
 
     #planCanvas {
       width: 100%;
-      min-height: 720px;
-      height: 78vh;
-      max-height: 920px;
+      min-height: 780px;
+      height: 84vh;
+      max-height: 1080px;
       display: block;
       background: #f8fafc;
       border-radius: 10px;
@@ -494,7 +502,7 @@
       .top { grid-template-columns: 1fr; }
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .plan-layout { grid-template-columns: 1fr; }
-      #planCanvas { min-height: 620px; height: 70vh; max-height: 860px; }
+      #planCanvas { min-height: 680px; height: 76vh; max-height: 960px; }
     }
 
     @media (max-width: 700px) {
@@ -560,6 +568,7 @@
           <button class="btn active" data-room-scope="living">リビング</button>
           <button class="btn" data-room-scope="bedroom">寝室</button>
           <button class="btn" data-room-scope="roof">ルーフバルコニー</button>
+          <button class="btn" id="togglePlanFocus">平面図を最大化</button>
         </div>
 
         <div class="plan-layout">
@@ -848,6 +857,7 @@
     applySharedStateFromUrl();
     let selectedIndex = findSelectedIndex();
     let photoRoomFilter = state.activeRoom || 'living';
+    let planFocus = false;
     let drag = null;
     let renderCache = { dpr: 1, scale: 1, ox: 0, oy: 0, width: 0, height: 0 };
 
@@ -1383,6 +1393,11 @@
       document.getElementById('shareBaseUrl').value = state.shareBaseUrl || autoShareBase || '';
       document.querySelectorAll('#roomScope .btn').forEach((b) => b.classList.toggle('active', b.dataset.roomScope === getActiveRoomKey()));
       document.querySelectorAll('#photoFilters .btn').forEach((b) => b.classList.toggle('active', b.dataset.room === photoRoomFilter));
+      const focusBtn = document.getElementById('togglePlanFocus');
+      if (focusBtn) {
+        focusBtn.classList.toggle('active', planFocus);
+        focusBtn.textContent = planFocus ? '通常表示に戻す' : '平面図を最大化';
+      }
       document.title = `${state.projectName || '引っ越しプランナー'} | 平面図で家具配置`;
     }
 
@@ -1398,6 +1413,16 @@
       renderPhotos();
       renderCards();
       renderTop();
+    }
+
+    function setPlanFocus(next) {
+      planFocus = !!next;
+      const layout = document.querySelector('.plan-layout');
+      if (layout) layout.classList.toggle('focus-canvas', planFocus);
+      const btn = document.getElementById('togglePlanFocus');
+      if (btn) btn.textContent = planFocus ? '通常表示に戻す' : '平面図を最大化';
+      setCanvasSize();
+      drawPlan();
     }
 
     function setActiveRoom(roomKey) {
@@ -1511,6 +1536,10 @@
         const btn = e.target.closest('button[data-room-scope]');
         if (!btn) return;
         setActiveRoom(btn.dataset.roomScope);
+      });
+
+      document.getElementById('togglePlanFocus').addEventListener('click', () => {
+        setPlanFocus(!planFocus);
       });
 
       document.getElementById('applyItem').addEventListener('click', () => {
