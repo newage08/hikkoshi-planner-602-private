@@ -833,10 +833,17 @@
     }
 
     function normalizeState(data) {
+      const mappedItems = (data.items || clone(defaultState.items)).map((it) => {
+        const zoneMap = { kitchen: 'living', wet: 'living', southBalcony: 'living', northBalcony: 'roof', balcony: 'roof' };
+        const z = zoneMap[it.zone] || it.zone;
+        const allowed = z === 'living' || z === 'bedroom' || z === 'roof';
+        return { ...it, zone: allowed ? z : 'living' };
+      });
+
       return {
         ...clone(defaultState),
         ...data,
-        items: data.items || clone(defaultState.items),
+        items: mappedItems,
         money: data.money || clone(defaultState.money),
         dispose: data.dispose || clone(defaultState.dispose),
         tasksDone: data.tasksDone || {},
@@ -944,7 +951,7 @@
 
     function isInsideZone(item) {
       const z = fitZones[item.zone];
-      if (!z) return true;
+      if (!z) return false;
       return item.x >= z.x && item.z >= z.z && item.x + item.w <= z.x + z.w && item.z + item.d <= z.z + z.d;
     }
 
