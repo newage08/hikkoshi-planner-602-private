@@ -491,7 +491,9 @@
       border-radius: 10px;
       overflow: hidden;
       background: #0f172a;
-      aspect-ratio: 16 / 10;
+      aspect-ratio: var(--live-ar, 4 / 3);
+      min-height: 440px;
+      max-height: 78vh;
     }
 
     .live-stage img {
@@ -499,8 +501,9 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
+      image-rendering: auto;
     }
 
     .live-overlay {
@@ -747,9 +750,10 @@
 
           <div class="live-panel">
             <div class="live-head">
-              <div class="mini">実写プレビュー（マーカーをドラッグで微調整）</div>
+              <div class="mini" id="liveMeta">実写プレビュー</div>
               <div class="live-tools">
                 <select id="livePhotoSelect"></select>
+                <button class="btn" id="openLiveOriginal">原寸</button>
                 <button class="btn" id="resetLiveNudges">補正リセット</button>
               </div>
             </div>
@@ -1559,11 +1563,13 @@
       const img = document.getElementById('liveStageImage');
       const overlay = document.getElementById('liveOverlay');
       const stage = document.getElementById('liveStage');
-      if (!select || !img || !overlay || !stage) return;
+      const meta = document.getElementById('liveMeta');
+      if (!select || !img || !overlay || !stage || !meta) return;
 
       if (!list.length) {
         select.innerHTML = '';
         overlay.innerHTML = '';
+        meta.textContent = '実写プレビュー';
         return;
       }
 
@@ -1575,6 +1581,11 @@
         img.src = resolvedSrc;
         img.dataset.src = resolvedSrc;
       }
+      const activePhoto = list.find((p) => p.src === resolvedSrc) || list[0];
+      if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
+        stage.style.setProperty('--live-ar', `${img.naturalWidth} / ${img.naturalHeight}`);
+      }
+      meta.textContent = `${activePhoto.cap} ${img.naturalWidth || '-'}x${img.naturalHeight || '-'}`;
 
       const stageRect = stage.getBoundingClientRect();
       const stageW = Math.max(1, stageRect.width);
@@ -1766,9 +1777,11 @@
     function bindLiveScene() {
       const select = document.getElementById('livePhotoSelect');
       const resetBtn = document.getElementById('resetLiveNudges');
+      const openBtn = document.getElementById('openLiveOriginal');
       const overlay = document.getElementById('liveOverlay');
       const stage = document.getElementById('liveStage');
-      if (!select || !resetBtn || !overlay || !stage) return;
+      const img = document.getElementById('liveStageImage');
+      if (!select || !resetBtn || !openBtn || !overlay || !stage || !img) return;
 
       select.addEventListener('change', () => {
         const roomKey = getActiveRoomKey();
@@ -1778,11 +1791,23 @@
         renderLiveScene();
       });
 
+      openBtn.addEventListener('click', () => {
+        if (!img.dataset.src) return;
+        window.open(img.dataset.src, '_blank', 'noopener');
+      });
+
       resetBtn.addEventListener('click', () => {
         const roomKey = getActiveRoomKey();
         ensurePhotoScene();
         state.photoScene.nudges[roomKey] = {};
         saveState();
+        renderLiveScene();
+      });
+
+      img.addEventListener('load', () => {
+        if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+          stage.style.setProperty('--live-ar', `${img.naturalWidth} / ${img.naturalHeight}`);
+        }
         renderLiveScene();
       });
 
