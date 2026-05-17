@@ -238,8 +238,28 @@
 
     .plan-layout {
       display: grid;
-      grid-template-columns: 1.35fr .9fr;
+      grid-template-columns: minmax(0, 1fr) 360px;
       gap: 10px;
+    }
+
+    .room-scope {
+      margin: 10px 0 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .room-scope .btn {
+      padding: 7px 11px;
+      font-size: 12px;
+    }
+
+    .room-scope .btn.active {
+      border-color: #0f172a;
+      background: #0f172a;
+      color: #fff;
+      font-weight: 700;
     }
 
     .canvas-wrap {
@@ -255,9 +275,9 @@
 
     #planCanvas {
       width: 100%;
-      min-height: 540px;
-      height: 62vh;
-      max-height: 760px;
+      min-height: 720px;
+      height: 78vh;
+      max-height: 920px;
       display: block;
       background: #f8fafc;
       border-radius: 10px;
@@ -474,7 +494,7 @@
       .top { grid-template-columns: 1fr; }
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .plan-layout { grid-template-columns: 1fr; }
-      #planCanvas { height: 54vh; }
+      #planCanvas { min-height: 620px; height: 70vh; max-height: 860px; }
     }
 
     @media (max-width: 700px) {
@@ -533,7 +553,14 @@
     <section id="sec-plan" class="section active">
       <div class="panel block">
         <h2>真上の平面図（ドラッグ配置）</h2>
-        <p class="muted">家具をドラッグして配置。右側で座標・寸法の微調整も可能。<strong>重なり</strong>と<strong>部屋外はみ出し</strong>を自動検出します。</p>
+        <p class="muted">家具をドラッグして配置。右側で座標・寸法の微調整も可能。<strong>重なり</strong>と<strong>部屋外はみ出し</strong>を自動検出します。部屋モードを切り替えると、その部屋だけを大きく編集できます。</p>
+
+        <div class="room-scope" id="roomScope">
+          <span class="muted" style="margin-right:4px;">編集する部屋:</span>
+          <button class="btn active" data-room-scope="living">リビング</button>
+          <button class="btn" data-room-scope="bedroom">寝室</button>
+          <button class="btn" data-room-scope="roof">ルーフバルコニー</button>
+        </div>
 
         <div class="plan-layout">
           <div>
@@ -608,9 +635,8 @@
           <h2 style="font-size:15px;">写真ダブルチェック（部屋ごと）</h2>
           <p class="muted">配置の最終確認と部屋の雰囲気合わせ用。部屋を切り替えて見比べできます。</p>
           <div class="photo-tools" id="photoFilters">
-            <button class="btn active" data-room="all">全部</button>
             <button class="btn" data-room="plan">間取り</button>
-            <button class="btn" data-room="living">リビング</button>
+            <button class="btn active" data-room="living">リビング</button>
             <button class="btn" data-room="bedroom">寝室</button>
             <button class="btn" data-room="roof">ルーフバルコニー</button>
           </div>
@@ -739,6 +765,7 @@
       budget: 450000,
       notes: '',
       shareBaseUrl: '',
+      activeRoom: 'living',
       selectedItemId: 'tv',
       items: [
         { id: 'tv', name: 'LOWYA TVスタンド', zone: 'living', x: 12, z: 220, w: 120, d: 33, color: '#f59e0b' },
@@ -795,7 +822,7 @@
       roof: zones.roof
     };
 
-    const worldExt = { minX: 0, maxX: 317, minZ: 0, maxZ: 1176 };
+    let worldExt = { minX: 0, maxX: 317, minZ: 0, maxZ: 1176 };
 
     const photos = [
       { room: 'plan', src: './assets/photos/plan/handwritten-plan.jpeg', cap: '手書き間取り（採寸メモ入り）' },
@@ -820,7 +847,7 @@
     let state = loadState();
     applySharedStateFromUrl();
     let selectedIndex = findSelectedIndex();
-    let photoRoomFilter = 'all';
+    let photoRoomFilter = state.activeRoom || 'living';
     let drag = null;
     let renderCache = { dpr: 1, scale: 1, ox: 0, oy: 0, width: 0, height: 0 };
 
@@ -840,9 +867,12 @@
         return { ...it, zone: allowed ? z : 'living' };
       });
 
+      const activeRoom = ['living', 'bedroom', 'roof'].includes(data.activeRoom) ? data.activeRoom : 'living';
+
       return {
         ...clone(defaultState),
         ...data,
+        activeRoom,
         items: mappedItems,
         money: data.money || clone(defaultState.money),
         dispose: data.dispose || clone(defaultState.dispose),
@@ -897,6 +927,44 @@
     function findSelectedIndex() {
       const idx = state.items.findIndex((x) => x.id === state.selectedItemId);
       return idx >= 0 ? idx : 0;
+    }
+
+    function getActiveRoomKey() {
+      return ['living', 'bedroom', 'roof'].includes(state.activeRoom) ? state.activeRoom : 'living';
+    }
+
+    function getActiveZone() {
+      return zones[getActiveRoomKey()] || zones.living;
+    }
+
+    function getRoomItemsWithIndex(roomKey = getActiveRoomKey()) {
+      const list = [];
+      for (let i = 0; i < state.items.length; i++) {
+        if (state.items[i].zone === roomKey) list.push({ item: state.items[i], idx: i });
+      }
+      return list;
+    }
+
+    function ensureSelectedInActiveRoom() {
+      const room = getActiveRoomKey();
+      const selected = state.items[selectedIndex];
+      if (selected && selected.zone === room) return;
+      const first = getRoomItemsWithIndex(room)[0];
+      if (first) {
+        selectedIndex = first.idx;
+        state.selectedItemId = first.item.id;
+      }
+    }
+
+    function calcWorldExtForRoom(roomKey) {
+      const z = zones[roomKey] || zones.living;
+      const pad = 42;
+      return {
+        minX: Math.max(0, z.x - pad),
+        maxX: z.x + z.w + pad,
+        minZ: Math.max(0, z.z - pad),
+        maxZ: z.z + z.d + pad
+      };
     }
 
     function formatYen(v) {
@@ -955,15 +1023,17 @@
       return item.x >= z.x && item.z >= z.z && item.x + item.w <= z.x + z.w && item.z + item.d <= z.z + z.d;
     }
 
-    function diagnostics() {
+    function diagnostics(roomKey = null) {
       const collisions = [];
       const boundary = [];
+      const target = roomKey || getActiveRoomKey();
+      const roomItems = state.items.filter((it) => it.zone === target);
 
-      for (let i = 0; i < state.items.length; i++) {
-        const a = state.items[i];
+      for (let i = 0; i < roomItems.length; i++) {
+        const a = roomItems[i];
         if (!isInsideZone(a)) boundary.push(a.name);
-        for (let j = i + 1; j < state.items.length; j++) {
-          const b = state.items[j];
+        for (let j = i + 1; j < roomItems.length; j++) {
+          const b = roomItems[j];
           if (overlaps(a, b)) collisions.push(`${a.name} × ${b.name}`);
         }
       }
@@ -972,6 +1042,7 @@
 
     function setCanvasSize() {
       const rect = canvas.getBoundingClientRect();
+      worldExt = calcWorldExtForRoom(getActiveRoomKey());
       const dpr = Math.min(2, window.devicePixelRatio || 1);
       canvas.width = Math.floor(rect.width * dpr);
       canvas.height = Math.floor(rect.height * dpr);
@@ -1078,10 +1149,10 @@
       ctx.fillText(item.name, x + 4, y + 13);
     }
 
-    function drawDims() {
-      const pL = worldToScreen(0, 0);
-      const pR = worldToScreen(310, 0);
-      const pT = worldToScreen(0, 494);
+    function drawDims(zone) {
+      const pL = worldToScreen(zone.x, zone.z);
+      const pR = worldToScreen(zone.x + zone.w, zone.z);
+      const pT = worldToScreen(zone.x, zone.z + zone.d);
 
       ctx.strokeStyle = 'rgba(15,118,110,.8)';
       ctx.lineWidth = 2;
@@ -1092,43 +1163,43 @@
 
       ctx.fillStyle = '#0f766e';
       ctx.font = 'bold 12px "Avenir Next", "Hiragino Kaku Gothic ProN", sans-serif';
-      ctx.fillText('310cm', (pL.x + pR.x) / 2 - 20, pL.y + 16);
+      ctx.fillText(`${zone.w}cm`, (pL.x + pR.x) / 2 - 20, pL.y + 16);
 
       ctx.beginPath();
       ctx.moveTo(pL.x - 20, pL.y);
       ctx.lineTo(pT.x - 20, pT.y);
       ctx.stroke();
-      ctx.fillText('494cm', pL.x - 54, (pL.y + pT.y) / 2);
+      ctx.fillText(`${zone.d}cm`, pL.x - 54, (pL.y + pT.y) / 2);
     }
 
     function drawPlan() {
       ctx.clearRect(0, 0, renderCache.width, renderCache.height);
       drawGrid();
+      const activeZone = getActiveZone();
+      drawZoneRect(activeZone);
+      drawDims(activeZone);
 
-      drawZoneRect(zones.living);
-      drawZoneRect(zones.bedroom);
-      drawZoneRect(zones.roof);
-
-      drawDims();
-
-      state.items.forEach((item, idx) => drawFurniture(item, idx === selectedIndex));
+      const roomItems = getRoomItemsWithIndex(getActiveRoomKey());
+      roomItems.forEach(({ item, idx }) => drawFurniture(item, idx === selectedIndex));
     }
 
     function hitTest(px, py) {
-      for (let i = state.items.length - 1; i >= 0; i--) {
-        const it = state.items[i];
+      const roomItems = getRoomItemsWithIndex(getActiveRoomKey());
+      for (let i = roomItems.length - 1; i >= 0; i--) {
+        const { item: it, idx } = roomItems[i];
         const p1 = worldToScreen(it.x, it.z);
         const p2 = worldToScreen(it.x + it.w, it.z + it.d);
         const x = Math.min(p1.x, p2.x);
         const y = Math.min(p1.y, p2.y);
         const w = Math.abs(p2.x - p1.x);
         const h = Math.abs(p2.y - p1.y);
-        if (px >= x && px <= x + w && py >= y && py <= y + h) return i;
+        if (px >= x && px <= x + w && py >= y && py <= y + h) return idx;
       }
       return -1;
     }
 
     function updateInspector() {
+      ensureSelectedInActiveRoom();
       const it = state.items[selectedIndex];
       document.getElementById('selectedName').textContent = it ? it.name : '未選択';
       document.getElementById('selectedZone').textContent = it ? `ゾーン: ${zones[it.zone]?.name || it.zone}` : 'ゾーン: -';
@@ -1139,7 +1210,7 @@
       document.getElementById('inputW').value = it ? Math.round(it.w) : '';
       document.getElementById('inputD').value = it ? Math.round(it.d) : '';
 
-      const diag = diagnostics();
+      const diag = diagnostics(getActiveRoomKey());
       const ov = document.getElementById('statusOverlap');
       const bd = document.getElementById('statusBoundary');
 
@@ -1151,8 +1222,11 @@
     }
 
     function renderItemTable() {
+      ensureSelectedInActiveRoom();
       const tbody = document.querySelector('#itemTable tbody');
-      const diag = diagnostics();
+      const roomKey = getActiveRoomKey();
+      const diag = diagnostics(roomKey);
+      const roomItems = getRoomItemsWithIndex(roomKey);
 
       function stateText(item) {
         const issues = [];
@@ -1161,7 +1235,7 @@
         return issues.length ? issues.join(' / ') : 'OK';
       }
 
-      tbody.innerHTML = state.items.map((it, idx) => `
+      tbody.innerHTML = roomItems.map(({ item: it, idx }) => `
         <tr data-idx="${idx}" class="${idx===selectedIndex?'selected':''}">
           <td><button class="btn" data-act="sel">選択</button></td>
           <td>${escapeHtml(it.name)}</td>
@@ -1180,6 +1254,8 @@
       const tasks = getTasks();
       const done = tasks.filter((t) => t.done).length;
       const notDone = tasks.length - done;
+      const activeRoom = getActiveRoomKey();
+      const activeCount = getRoomItemsWithIndex(activeRoom).length;
 
       let dayText = '未設定';
       if (state.moveDate) {
@@ -1197,7 +1273,7 @@
         <article class="card"><div class="k">予算差分</div><div class="v" style="color:${delta>=0?'#166534':'#b91c1c'}">${formatYen(delta)}円</div><div class="sub">予算 ${delta>=0?'内':'超過'}</div></article>
         <article class="card"><div class="k">タスク進捗</div><div class="v">${done}/${tasks.length}</div><div class="sub">未完了 ${notDone}</div></article>
         <article class="card"><div class="k">粗大ごみ件数</div><div class="v">${state.dispose.length}</div><div class="sub">${state.dispose.filter((x)=>x.status!=='完了').length}件未完</div></article>
-        <article class="card"><div class="k">家具配置</div><div class="v">${state.items.length}</div><div class="sub">平面図で調整中</div></article>
+        <article class="card"><div class="k">家具配置</div><div class="v">${activeCount}</div><div class="sub">${escapeHtml(zones[activeRoom].name)}で編集中（全${state.items.length}）</div></article>
         <article class="card"><div class="k">案件名</div><div class="v" style="font-size:17px;">${escapeHtml(state.projectName||'未設定')}</div><div class="sub">変更可</div></article>
       `;
     }
@@ -1305,10 +1381,13 @@
       document.getElementById('notes').value = state.notes || '';
       const autoShareBase = location.protocol.startsWith('http') ? `${location.origin}${location.pathname}` : '';
       document.getElementById('shareBaseUrl').value = state.shareBaseUrl || autoShareBase || '';
+      document.querySelectorAll('#roomScope .btn').forEach((b) => b.classList.toggle('active', b.dataset.roomScope === getActiveRoomKey()));
+      document.querySelectorAll('#photoFilters .btn').forEach((b) => b.classList.toggle('active', b.dataset.room === photoRoomFilter));
       document.title = `${state.projectName || '引っ越しプランナー'} | 平面図で家具配置`;
     }
 
     function renderAll() {
+      ensureSelectedInActiveRoom();
       setCanvasSize();
       drawPlan();
       updateInspector();
@@ -1319,6 +1398,17 @@
       renderPhotos();
       renderCards();
       renderTop();
+    }
+
+    function setActiveRoom(roomKey) {
+      if (!['living', 'bedroom', 'roof'].includes(roomKey)) return;
+      state.activeRoom = roomKey;
+      photoRoomFilter = roomKey;
+      ensureSelectedInActiveRoom();
+      saveState();
+      document.querySelectorAll('#roomScope .btn').forEach((b) => b.classList.toggle('active', b.dataset.roomScope === roomKey));
+      document.querySelectorAll('#photoFilters .btn').forEach((b) => b.classList.toggle('active', b.dataset.room === roomKey));
+      renderAll();
     }
 
     function snap(v) {
@@ -1415,6 +1505,12 @@
 
       document.getElementById('jumpShare').addEventListener('click', () => {
         switchTab('notes');
+      });
+
+      document.getElementById('roomScope').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-room-scope]');
+        if (!btn) return;
+        setActiveRoom(btn.dataset.roomScope);
       });
 
       document.getElementById('applyItem').addEventListener('click', () => {
@@ -1595,8 +1691,15 @@
       document.getElementById('photoFilters').addEventListener('click', (e) => {
         const btn = e.target.closest('button[data-room]');
         if (!btn) return;
-        photoRoomFilter = btn.dataset.room;
+        const room = btn.dataset.room;
+        photoRoomFilter = room;
         document.querySelectorAll('#photoFilters .btn').forEach((b) => b.classList.toggle('active', b === btn));
+        if (room === 'living' || room === 'bedroom' || room === 'roof') {
+          if (state.activeRoom !== room) {
+            setActiveRoom(room);
+            return;
+          }
+        }
         renderPhotos();
       });
 
