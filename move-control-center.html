@@ -491,10 +491,12 @@
     <div class="top">
       <section class="panel hero">
         <h1>引っ越しプランナー</h1>
-        <p>3D表示は精度と安定性の問題があるため一旦停止。<strong>真上の平面図</strong>に統一して、家具配置と寸法チェックを確実に行えるようにしました。</p>
+        <p>3D表示は停止し、<strong>真上の平面図</strong>で寸法チェックに特化。ゾーンは「リビング / 寝室 / ルーフバルコニー」の3つだけに絞っています。</p>
         <div class="hero-row">
           <span class="chip">ル・リオン東京 602</span>
           <span class="chip">リビング 494 x 310 cm</span>
+          <span class="chip">寝室 238 x 216 cm</span>
+          <span class="chip">ルーフバルコニー 140 x 350 cm</span>
           <span class="chip">ベッドは寝室のみ</span>
           <button class="btn" id="openLegacy3d">旧3Dページを開く</button>
           <button class="btn" id="jumpShare">共有リンク作成へ</button>
@@ -540,10 +542,8 @@
             </div>
             <div class="legend">
               <span><i class="dot" style="background:var(--living)"></i>リビング</span>
-              <span><i class="dot" style="background:var(--kitchen)"></i>キッチン帯</span>
-              <span><i class="dot" style="background:var(--wet)"></i>洗面/浴室/トイレ</span>
-              <span><i class="dot" style="background:var(--bed)"></i>寝室ゾーン</span>
-              <span><i class="dot" style="background:var(--balcony)"></i>バルコニー</span>
+              <span><i class="dot" style="background:var(--bed)"></i>寝室</span>
+              <span><i class="dot" style="background:var(--balcony)"></i>ルーフバルコニー</span>
             </div>
           </div>
 
@@ -611,13 +611,8 @@
             <button class="btn active" data-room="all">全部</button>
             <button class="btn" data-room="plan">間取り</button>
             <button class="btn" data-room="living">リビング</button>
-            <button class="btn" data-room="kitchen">キッチン</button>
             <button class="btn" data-room="bedroom">寝室</button>
-            <button class="btn" data-room="wash">洗面</button>
-            <button class="btn" data-room="bath">浴室</button>
-            <button class="btn" data-room="toilet">トイレ</button>
-            <button class="btn" data-room="entry">玄関</button>
-            <button class="btn" data-room="balcony">バルコニー</button>
+            <button class="btn" data-room="roof">ルーフバルコニー</button>
           </div>
           <div class="photo-grid" id="photoGrid"></div>
         </div>
@@ -790,21 +785,17 @@
 
     const zones = {
       living: { name: 'リビング', x: 0, z: 0, w: 310, d: 494, color: getCSS('--living') },
-      kitchen: { name: 'キッチン帯', x: 0, z: 494, w: 317, d: 116, color: getCSS('--kitchen') },
-      wet: { name: '洗面/浴室/トイレ', x: 0, z: 610, w: 79, d: 216, color: getCSS('--wet') },
       bedroom: { name: '寝室', x: 79, z: 610, w: 238, d: 216, color: getCSS('--bed') },
-      southBalcony: { name: '南バルコニー', x: 36, z: -166, w: 238, d: 166, color: getCSS('--balcony') },
-      northBalcony: { name: '北バルコニー', x: 79, z: 826, w: 238, d: 140, color: getCSS('--balcony') }
+      roof: { name: 'ルーフバルコニー', x: 79, z: 826, w: 140, d: 350, color: getCSS('--balcony') }
     };
 
     const fitZones = {
       living: zones.living,
       bedroom: zones.bedroom,
-      kitchen: zones.kitchen,
-      wet: zones.wet
+      roof: zones.roof
     };
 
-    const worldExt = { minX: 0, maxX: 317, minZ: -166, maxZ: 966 };
+    const worldExt = { minX: 0, maxX: 317, minZ: 0, maxZ: 1176 };
 
     const photos = [
       { room: 'plan', src: './assets/photos/plan/handwritten-plan.jpeg', cap: '手書き間取り（採寸メモ入り）' },
@@ -814,35 +805,13 @@
       { room: 'living', src: './assets/photos/living/living-wide-3.jpeg', cap: 'リビング全景3（奥行き確認）' },
       { room: 'living', src: './assets/photos/living/living-wall-window.jpeg', cap: 'リビング壁/窓まわり' },
 
-      { room: 'kitchen', src: './assets/photos/kitchen/kitchen-red-counter.jpeg', cap: '赤キッチン全体' },
-      { room: 'kitchen', src: './assets/photos/kitchen/kitchen-side-shelf.jpeg', cap: 'キッチン脇棚の向き確認' },
-      { room: 'kitchen', src: './assets/photos/kitchen/kitchen-stove-top.jpeg', cap: 'コンロ天板まわり' },
-
       { room: 'bedroom', src: './assets/photos/bedroom/bedroom-main.jpeg', cap: '寝室全体（ベッド配置先）' },
 
-      { room: 'wash', src: './assets/photos/wash/wash-machine-pan.jpeg', cap: '洗濯機置場' },
-      { room: 'wash', src: './assets/photos/wash/wash-pan-size-58x58.jpeg', cap: '洗濯パン 58x58' },
-      { room: 'wash', src: './assets/photos/wash/wash-sink-1.jpeg', cap: '洗面台1' },
-      { room: 'wash', src: './assets/photos/wash/wash-sink-2.jpeg', cap: '洗面台2' },
-      { room: 'wash', src: './assets/photos/wash/wash-upper-shelf.jpeg', cap: '洗面上棚 66x30' },
-
-      { room: 'bath', src: './assets/photos/bath/bath-room-1.jpeg', cap: '浴室1' },
-      { room: 'bath', src: './assets/photos/bath/bath-room-2.jpeg', cap: '浴室2' },
-      { room: 'bath', src: './assets/photos/bath/bath-switch.jpeg', cap: '浴室スイッチ' },
-      { room: 'bath', src: './assets/photos/bath/bath-controller-close.jpeg', cap: '浴室コントローラ' },
-
-      { room: 'toilet', src: './assets/photos/toilet/toilet-main.jpeg', cap: 'トイレ' },
-
-      { room: 'entry', src: './assets/photos/entry/entry-red-cabinet.jpeg', cap: '玄関収納（赤）' },
-      { room: 'entry', src: './assets/photos/entry/entry-door-77.jpeg', cap: '玄関ドア幅77' },
-      { room: 'entry', src: './assets/photos/entry/entry-step-24.jpeg', cap: '玄関段差24' },
-      { room: 'entry', src: './assets/photos/entry/entry-shelf-183-41.jpeg', cap: '玄関棚 183/41' },
-
-      { room: 'balcony', src: './assets/photos/balcony/balcony-view-1.jpeg', cap: 'バルコニー眺望1' },
-      { room: 'balcony', src: './assets/photos/balcony/balcony-view-2.jpeg', cap: 'バルコニー眺望2' },
-      { room: 'balcony', src: './assets/photos/balcony/balcony-view-3.jpeg', cap: 'バルコニー眺望3' },
-      { room: 'balcony', src: './assets/photos/balcony/balcony-view-4.jpeg', cap: 'バルコニー眺望4' },
-      { room: 'balcony', src: './assets/photos/balcony/balcony-roof-size.jpeg', cap: '屋上側 140x350メモ' }
+      { room: 'roof', src: './assets/photos/balcony/balcony-view-1.jpeg', cap: 'ルーフバルコニー眺望1' },
+      { room: 'roof', src: './assets/photos/balcony/balcony-view-2.jpeg', cap: 'ルーフバルコニー眺望2' },
+      { room: 'roof', src: './assets/photos/balcony/balcony-view-3.jpeg', cap: 'ルーフバルコニー眺望3' },
+      { room: 'roof', src: './assets/photos/balcony/balcony-view-4.jpeg', cap: 'ルーフバルコニー眺望4' },
+      { room: 'roof', src: './assets/photos/balcony/balcony-roof-size.jpeg', cap: 'ルーフバルコニー寸法メモ 140x350' }
     ];
 
     const canvas = document.getElementById('planCanvas');
@@ -1129,12 +1098,9 @@
       ctx.clearRect(0, 0, renderCache.width, renderCache.height);
       drawGrid();
 
-      drawZoneRect(zones.southBalcony);
-      drawZoneRect(zones.northBalcony);
       drawZoneRect(zones.living);
-      drawZoneRect(zones.kitchen);
-      drawZoneRect(zones.wet);
       drawZoneRect(zones.bedroom);
+      drawZoneRect(zones.roof);
 
       drawDims();
 
