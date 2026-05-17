@@ -1,0 +1,1646 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>引っ越しプランナー | 平面図で家具配置</title>
+  <style>
+    :root {
+      --ink: #0f172a;
+      --ink-soft: #334155;
+      --line: #cbd5e1;
+      --panel: #ffffffee;
+      --brand: #0f766e;
+      --brand-2: #115e59;
+      --accent: #ea580c;
+      --ok: #166534;
+      --warn: #b91c1c;
+      --bg-a: #f8fafc;
+      --bg-b: #e7eff7;
+      --living: #bfdbfe;
+      --kitchen: #fde68a;
+      --wet: #fecdd3;
+      --bed: #bbf7d0;
+      --balcony: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 700px at -10% -20%, #ffffff, transparent 70%),
+        radial-gradient(900px 600px at 110% 10%, #dff4ff, transparent 70%),
+        linear-gradient(160deg, var(--bg-a), var(--bg-b));
+      font-family: "Avenir Next", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+
+    .wrap {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+
+    .top {
+      display: grid;
+      grid-template-columns: 1.3fr .9fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 14px 34px rgba(15, 23, 42, .08);
+      backdrop-filter: blur(4px);
+    }
+
+    .hero {
+      padding: 14px;
+    }
+
+    .hero h1 {
+      margin: 0 0 6px;
+      font-size: 29px;
+      letter-spacing: .2px;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .hero-row {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      border: 1px solid #bae6fd;
+      background: #ecfeff;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 12px;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .meta {
+      padding: 14px;
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+
+    label {
+      font-size: 11px;
+      color: #475569;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input, select, textarea, button {
+      font: inherit;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      background: #fff;
+      color: #0f172a;
+      padding: 8px 9px;
+      font-size: 13px;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .btn {
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #0f172a;
+      border-radius: 10px;
+      padding: 8px 11px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, .12);
+    }
+
+    .btn.primary {
+      border-color: #0f766e;
+      background: linear-gradient(130deg, var(--brand), var(--brand-2));
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .btn.warn {
+      border-color: #fca5a5;
+      background: #fff1f2;
+      color: #9f1239;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .card .k {
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 2px;
+      font-weight: 700;
+    }
+
+    .card .v {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .card .sub {
+      margin-top: 3px;
+      color: #475569;
+      font-size: 11px;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .tab {
+      border: 1px solid #b7c6d8;
+      background: #eef3f9;
+      color: #1e293b;
+      border-radius: 10px;
+      padding: 8px 11px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .block {
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .block h2 {
+      margin: 0 0 6px;
+      font-size: 17px;
+    }
+
+    .muted {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.45;
+    }
+
+    .plan-layout {
+      display: grid;
+      grid-template-columns: 1.35fr .9fr;
+      gap: 10px;
+    }
+
+    .canvas-wrap {
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background:
+        linear-gradient(180deg, #f8fafc, #f1f5f9),
+        repeating-linear-gradient(0deg, #ffffff00 0, #ffffff00 24px, #ffffff40 25px),
+        repeating-linear-gradient(90deg, #ffffff00 0, #ffffff00 24px, #ffffff40 25px);
+      padding: 8px;
+      position: relative;
+    }
+
+    #planCanvas {
+      width: 100%;
+      min-height: 540px;
+      height: 62vh;
+      max-height: 760px;
+      display: block;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #dbe3ee;
+      cursor: grab;
+    }
+
+    #planCanvas.dragging { cursor: grabbing; }
+
+    .legend {
+      margin-top: 7px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .legend span {
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid #00000014;
+      display: inline-block;
+    }
+
+    .inspector {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .mini {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .status {
+      padding: 8px 9px;
+      border-radius: 10px;
+      border: 1px solid #dbe3ee;
+      background: #fff;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .status.ok {
+      border-color: #86efac;
+      background: #f0fdf4;
+      color: #166534;
+      font-weight: 700;
+    }
+
+    .status.warn {
+      border-color: #fca5a5;
+      background: #fff1f2;
+      color: #9f1239;
+      font-weight: 700;
+    }
+
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .row3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .tbl th, .tbl td {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 7px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .tbl th {
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    .tbl tr.selected {
+      background: #eff6ff;
+    }
+
+    .pill {
+      display: inline-block;
+      border: 1px solid #d1d5db;
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 10px;
+      background: #fff;
+      color: #475569;
+    }
+
+    .timeline {
+      border: 1px solid #dbe3ee;
+      border-radius: 10px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .timeline-row {
+      display: grid;
+      grid-template-columns: 120px 1fr auto;
+      gap: 8px;
+      padding: 8px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 12px;
+      align-items: center;
+    }
+
+    .timeline-row:last-child { border-bottom: none; }
+
+    .timeline-row.done { background: #f0fdf4; }
+
+    .timeline-row .date { font-weight: 700; }
+
+    .footer {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 8px;
+    }
+
+    .photo-tools {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .photo-tools .btn {
+      padding: 6px 10px;
+      font-size: 11px;
+    }
+
+    .photo-tools .btn.active {
+      border-color: #0f172a;
+      background: #0f172a;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .photo-grid {
+      margin-top: 9px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .photo-card {
+      border: 1px solid #dbe3ee;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .photo-card img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+
+    .photo-cap {
+      padding: 7px;
+      font-size: 11px;
+      color: #334155;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+      line-height: 1.35;
+    }
+
+    .share-box {
+      border: 1px solid #dbe3ee;
+      border-radius: 10px;
+      background: #fff;
+      padding: 9px;
+      margin-top: 8px;
+    }
+
+    .share-link {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 12px;
+      color: #0f172a;
+      background: #f8fafc;
+      margin-top: 6px;
+      word-break: break-all;
+    }
+
+    @media (max-width: 1180px) {
+      .top { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .plan-layout { grid-template-columns: 1fr; }
+      #planCanvas { height: 54vh; }
+    }
+
+    @media (max-width: 700px) {
+      .cards { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 23px; }
+      .timeline-row { grid-template-columns: 1fr; }
+      .row3 { grid-template-columns: 1fr; }
+      .photo-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <section class="panel hero">
+        <h1>引っ越しプランナー</h1>
+        <p>3D表示は精度と安定性の問題があるため一旦停止。<strong>真上の平面図</strong>に統一して、家具配置と寸法チェックを確実に行えるようにしました。</p>
+        <div class="hero-row">
+          <span class="chip">ル・リオン東京 602</span>
+          <span class="chip">リビング 494 x 310 cm</span>
+          <span class="chip">ベッドは寝室のみ</span>
+          <button class="btn" id="openLegacy3d">旧3Dページを開く</button>
+          <button class="btn" id="jumpShare">共有リンク作成へ</button>
+        </div>
+      </section>
+
+      <section class="panel meta">
+        <div>
+          <label for="moveDate">引っ越し予定日</label>
+          <input id="moveDate" type="date" />
+        </div>
+        <div>
+          <label for="budget">予算上限（円）</label>
+          <input id="budget" type="number" step="1000" min="0" />
+        </div>
+        <div>
+          <label for="projectName">案件名</label>
+          <input id="projectName" type="text" />
+        </div>
+        <button class="btn primary" id="saveTop">上の情報を保存</button>
+      </section>
+    </div>
+
+    <section class="cards" id="cards"></section>
+
+    <section class="tabs" id="tabs">
+      <button class="tab active" data-tab="plan">平面図で配置</button>
+      <button class="tab" data-tab="money">費用管理</button>
+      <button class="tab" data-tab="dispose">捨てるリスト</button>
+      <button class="tab" data-tab="schedule">スケジュール</button>
+      <button class="tab" data-tab="notes">メモ保存</button>
+    </section>
+
+    <section id="sec-plan" class="section active">
+      <div class="panel block">
+        <h2>真上の平面図（ドラッグ配置）</h2>
+        <p class="muted">家具をドラッグして配置。右側で座標・寸法の微調整も可能。<strong>重なり</strong>と<strong>部屋外はみ出し</strong>を自動検出します。</p>
+
+        <div class="plan-layout">
+          <div>
+            <div class="canvas-wrap">
+              <canvas id="planCanvas"></canvas>
+            </div>
+            <div class="legend">
+              <span><i class="dot" style="background:var(--living)"></i>リビング</span>
+              <span><i class="dot" style="background:var(--kitchen)"></i>キッチン帯</span>
+              <span><i class="dot" style="background:var(--wet)"></i>洗面/浴室/トイレ</span>
+              <span><i class="dot" style="background:var(--bed)"></i>寝室ゾーン</span>
+              <span><i class="dot" style="background:var(--balcony)"></i>バルコニー</span>
+            </div>
+          </div>
+
+          <aside class="inspector">
+            <div class="panel block" style="margin:0;">
+              <h2 style="font-size:14px;">選択中の家具</h2>
+              <div id="selectedName" style="font-weight:800;font-size:16px;margin-bottom:6px;">未選択</div>
+              <div class="mini" id="selectedZone">ゾーン: -</div>
+              <div class="mini" id="selectedSize">寸法: -</div>
+
+              <div class="row2" style="margin-top:8px;">
+                <div>
+                  <label for="inputX">X（cm）</label>
+                  <input id="inputX" type="number" step="1" />
+                </div>
+                <div>
+                  <label for="inputZ">Z（cm）</label>
+                  <input id="inputZ" type="number" step="1" />
+                </div>
+              </div>
+
+              <div class="row2" style="margin-top:8px;">
+                <div>
+                  <label for="inputW">幅（cm）</label>
+                  <input id="inputW" type="number" step="1" min="1" />
+                </div>
+                <div>
+                  <label for="inputD">奥行（cm）</label>
+                  <input id="inputD" type="number" step="1" min="1" />
+                </div>
+              </div>
+
+              <div class="row3" style="margin-top:8px;">
+                <button class="btn" id="applyItem">反映</button>
+                <button class="btn" id="rotateItem">90°回転</button>
+                <button class="btn warn" id="resetPlan">配置を初期化</button>
+              </div>
+            </div>
+
+            <div id="statusOverlap" class="status ok">重なりなし</div>
+            <div id="statusBoundary" class="status ok">はみ出しなし</div>
+          </aside>
+        </div>
+
+        <div style="margin-top:10px;overflow:auto;">
+          <table class="tbl" id="itemTable">
+            <thead>
+              <tr>
+                <th>選択</th>
+                <th>家具</th>
+                <th>ゾーン</th>
+                <th>寸法</th>
+                <th>座標(X,Z)</th>
+                <th>状態</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:12px;">
+          <h2 style="font-size:15px;">写真ダブルチェック（部屋ごと）</h2>
+          <p class="muted">配置の最終確認と部屋の雰囲気合わせ用。部屋を切り替えて見比べできます。</p>
+          <div class="photo-tools" id="photoFilters">
+            <button class="btn active" data-room="all">全部</button>
+            <button class="btn" data-room="plan">間取り</button>
+            <button class="btn" data-room="living">リビング</button>
+            <button class="btn" data-room="kitchen">キッチン</button>
+            <button class="btn" data-room="bedroom">寝室</button>
+            <button class="btn" data-room="wash">洗面</button>
+            <button class="btn" data-room="bath">浴室</button>
+            <button class="btn" data-room="toilet">トイレ</button>
+            <button class="btn" data-room="entry">玄関</button>
+            <button class="btn" data-room="balcony">バルコニー</button>
+          </div>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-money" class="section">
+      <div class="panel block">
+        <h2>費用管理</h2>
+        <p class="muted">確定・検討中・未定を分けて管理。見積が出たら金額を直接更新。</p>
+        <div style="overflow:auto;">
+          <table class="tbl" id="moneyTable">
+            <thead>
+              <tr>
+                <th>項目</th>
+                <th>分類</th>
+                <th>金額(円)</th>
+                <th>状態</th>
+                <th>備考</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" id="addMoney">費用項目を追加</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-dispose" class="section">
+      <div class="panel block">
+        <h2>捨てるリスト（粗大ごみ）</h2>
+        <div style="overflow:auto;">
+          <table class="tbl" id="disposeTable">
+            <thead>
+              <tr>
+                <th>品目</th>
+                <th>サイズ</th>
+                <th>回収費(円)</th>
+                <th>状態</th>
+                <th>予定日</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" id="addDispose">項目を追加</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-schedule" class="section">
+      <div class="panel block">
+        <h2>スケジュール</h2>
+        <div class="timeline" id="timeline"></div>
+
+        <div class="row3" style="margin-top:10px;">
+          <div>
+            <label for="newTaskTitle">追加タスク</label>
+            <input id="newTaskTitle" type="text" placeholder="例: ガス開栓の時間を最終確定" />
+          </div>
+          <div>
+            <label for="newTaskDate">期限</label>
+            <input id="newTaskDate" type="date" />
+          </div>
+          <div>
+            <label for="newTaskOwner">担当/備考</label>
+            <input id="newTaskOwner" type="text" placeholder="例: 自分" />
+          </div>
+        </div>
+
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" id="addTask">タスク追加</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-notes" class="section">
+      <div class="panel block">
+        <h2>共有 / メモ保存 / バックアップ</h2>
+        <div class="row2">
+          <div>
+            <label for="notes">統合メモ</label>
+            <textarea id="notes" placeholder="決定事項、連絡先、残課題などをここに集約"></textarea>
+            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn primary" id="saveNotes">メモ保存</button>
+            </div>
+          </div>
+          <div>
+            <label for="shareBaseUrl">共有用の公開URL（あなたが公開したURL）</label>
+            <input id="shareBaseUrl" type="text" placeholder="例: https://example.pages.dev/move-control-center.html" />
+            <div class="share-box">
+              <div class="muted">共有リンクを作ると、今の配置/費用/タスク状態を彼女側でも同じ画面で再現できます。</div>
+              <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn primary" id="buildShareLink">共有リンク生成</button>
+                <button class="btn" id="copyShareLink">リンクをコピー</button>
+              </div>
+              <input id="shareLink" class="share-link" readonly value="" />
+            </div>
+
+            <label style="margin-top:10px;">JSONバックアップ</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn" id="exportJson">JSONを書き出し</button>
+              <label class="btn" for="importJson">JSONを読み込み</label>
+              <input id="importJson" type="file" accept="application/json" style="display:none;" />
+            </div>
+            <p class="footer">このページは端末内保存を使います。JSONを使うと別端末でも同じ状態を再現できます。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'movePlanner_topview_v1';
+
+    const defaultState = {
+      projectName: 'ル・リオン東京 602 引っ越し',
+      moveDate: '',
+      budget: 450000,
+      notes: '',
+      shareBaseUrl: '',
+      selectedItemId: 'tv',
+      items: [
+        { id: 'tv', name: 'LOWYA TVスタンド', zone: 'living', x: 12, z: 220, w: 120, d: 33, color: '#f59e0b' },
+        { id: 'desk', name: 'LOWYA デスク', zone: 'living', x: 12, z: 390, w: 120, d: 70, color: '#fbbf24' },
+        { id: 'sofa', name: 'IKEA LILLEHEM ソファ', zone: 'living', x: 146, z: 116, w: 152, d: 76, color: '#3b82f6' },
+        { id: 'pura', name: 'PETKIT PuraMax2', zone: 'living', x: 236, z: 388, w: 62, d: 54, color: '#ef4444' },
+        { id: 'solo', name: 'PETKIT Solo', zone: 'living', x: 214, z: 446, w: 19, d: 32, color: '#dc2626' },
+        { id: 'water', name: '給水器', zone: 'living', x: 236, z: 450, w: 23, d: 23, color: '#f87171' },
+        { id: 'eufy', name: 'Eufy X8 Pro + station', zone: 'living', x: 250, z: 42, w: 45, d: 45, color: '#64748b' },
+        { id: 'mirror', name: '突っ張りミラー', zone: 'living', x: 300, z: 270, w: 8, d: 30, color: '#9ca3af' },
+        { id: 'hanger', name: 'ハンガーラック', zone: 'living', x: 272, z: 312, w: 30, d: 58, color: '#94a3b8' },
+        { id: 'tower', name: 'キャットタワー候補', zone: 'living', x: 232, z: 210, w: 60, d: 60, color: '#60a5fa' },
+        { id: 'bed', name: 'ベッド(寝室)', zone: 'bedroom', x: 118, z: 620, w: 140, d: 200, color: '#22c55e' }
+      ],
+      money: [
+        { name: 'IKEA LILLEHEM ソファ', category: '新規購入', amount: 51990, status: '確定', note: '公式価格' },
+        { name: 'LPF711 フロアマット', category: '床材', amount: 0, status: '未定', note: '' },
+        { name: 'ベッド（寝室）', category: '新規購入', amount: 0, status: '未定', note: '' },
+        { name: 'キャットタワー', category: '新規購入', amount: 0, status: '未定', note: '' },
+        { name: '電子レンジ', category: '家電', amount: 0, status: '未定', note: '' },
+        { name: '引っ越し業者', category: '引っ越し', amount: 0, status: '検討中', note: '見積比較' },
+        { name: '粗大ごみ回収', category: '処分', amount: 0, status: '検討中', note: '' }
+      ],
+      dispose: [
+        { name: 'シェルフラック', size: '幅85.5/65 奥41.5 高123.5', fee: 0, status: '未予約', date: '' },
+        { name: '旧ベッド', size: '要計測', fee: 0, status: '未予約', date: '' }
+      ],
+      tasksDone: {},
+      tasksExtra: []
+    };
+
+    const baseTasks = [
+      { id: 'm1', title: '引っ越し業者の見積比較', offset: -30, owner: '自分' },
+      { id: 'm2', title: '粗大ごみ回収の予約', offset: -24, owner: '自分' },
+      { id: 'm3', title: '電気/ガス/水道の停止・開始手続き', offset: -21, owner: '自分' },
+      { id: 'm4', title: 'ネット回線の移転/新規手続き', offset: -21, owner: '自分' },
+      { id: 'm5', title: '住所変更対象の洗い出し', offset: -14, owner: '自分' },
+      { id: 'm6', title: '持込家具の梱包・分解', offset: -10, owner: '自分' },
+      { id: 'm7', title: '不用品の最終搬出', offset: -5, owner: '自分' },
+      { id: 'm8', title: '荷造り完了', offset: -2, owner: '自分' },
+      { id: 'm9', title: '引っ越し当日チェック', offset: 0, owner: '自分' },
+      { id: 'm10', title: '転入後手続き', offset: 1, owner: '自分' }
+    ];
+
+    const zones = {
+      living: { name: 'リビング', x: 0, z: 0, w: 310, d: 494, color: getCSS('--living') },
+      kitchen: { name: 'キッチン帯', x: 0, z: 494, w: 317, d: 116, color: getCSS('--kitchen') },
+      wet: { name: '洗面/浴室/トイレ', x: 0, z: 610, w: 79, d: 216, color: getCSS('--wet') },
+      bedroom: { name: '寝室', x: 79, z: 610, w: 238, d: 216, color: getCSS('--bed') },
+      southBalcony: { name: '南バルコニー', x: 36, z: -166, w: 238, d: 166, color: getCSS('--balcony') },
+      northBalcony: { name: '北バルコニー', x: 79, z: 826, w: 238, d: 140, color: getCSS('--balcony') }
+    };
+
+    const fitZones = {
+      living: zones.living,
+      bedroom: zones.bedroom,
+      kitchen: zones.kitchen,
+      wet: zones.wet
+    };
+
+    const worldExt = { minX: 0, maxX: 317, minZ: -166, maxZ: 966 };
+
+    const photos = [
+      { room: 'plan', src: './assets/photos/plan/handwritten-plan.jpeg', cap: '手書き間取り（採寸メモ入り）' },
+
+      { room: 'living', src: './assets/photos/living/living-wide-1.jpeg', cap: 'リビング全景1（壁面）' },
+      { room: 'living', src: './assets/photos/living/living-wide-2.jpeg', cap: 'リビング全景2（窓向き）' },
+      { room: 'living', src: './assets/photos/living/living-wide-3.jpeg', cap: 'リビング全景3（奥行き確認）' },
+      { room: 'living', src: './assets/photos/living/living-wall-window.jpeg', cap: 'リビング壁/窓まわり' },
+
+      { room: 'kitchen', src: './assets/photos/kitchen/kitchen-red-counter.jpeg', cap: '赤キッチン全体' },
+      { room: 'kitchen', src: './assets/photos/kitchen/kitchen-side-shelf.jpeg', cap: 'キッチン脇棚の向き確認' },
+      { room: 'kitchen', src: './assets/photos/kitchen/kitchen-stove-top.jpeg', cap: 'コンロ天板まわり' },
+
+      { room: 'bedroom', src: './assets/photos/bedroom/bedroom-main.jpeg', cap: '寝室全体（ベッド配置先）' },
+
+      { room: 'wash', src: './assets/photos/wash/wash-machine-pan.jpeg', cap: '洗濯機置場' },
+      { room: 'wash', src: './assets/photos/wash/wash-pan-size-58x58.jpeg', cap: '洗濯パン 58x58' },
+      { room: 'wash', src: './assets/photos/wash/wash-sink-1.jpeg', cap: '洗面台1' },
+      { room: 'wash', src: './assets/photos/wash/wash-sink-2.jpeg', cap: '洗面台2' },
+      { room: 'wash', src: './assets/photos/wash/wash-upper-shelf.jpeg', cap: '洗面上棚 66x30' },
+
+      { room: 'bath', src: './assets/photos/bath/bath-room-1.jpeg', cap: '浴室1' },
+      { room: 'bath', src: './assets/photos/bath/bath-room-2.jpeg', cap: '浴室2' },
+      { room: 'bath', src: './assets/photos/bath/bath-switch.jpeg', cap: '浴室スイッチ' },
+      { room: 'bath', src: './assets/photos/bath/bath-controller-close.jpeg', cap: '浴室コントローラ' },
+
+      { room: 'toilet', src: './assets/photos/toilet/toilet-main.jpeg', cap: 'トイレ' },
+
+      { room: 'entry', src: './assets/photos/entry/entry-red-cabinet.jpeg', cap: '玄関収納（赤）' },
+      { room: 'entry', src: './assets/photos/entry/entry-door-77.jpeg', cap: '玄関ドア幅77' },
+      { room: 'entry', src: './assets/photos/entry/entry-step-24.jpeg', cap: '玄関段差24' },
+      { room: 'entry', src: './assets/photos/entry/entry-shelf-183-41.jpeg', cap: '玄関棚 183/41' },
+
+      { room: 'balcony', src: './assets/photos/balcony/balcony-view-1.jpeg', cap: 'バルコニー眺望1' },
+      { room: 'balcony', src: './assets/photos/balcony/balcony-view-2.jpeg', cap: 'バルコニー眺望2' },
+      { room: 'balcony', src: './assets/photos/balcony/balcony-view-3.jpeg', cap: 'バルコニー眺望3' },
+      { room: 'balcony', src: './assets/photos/balcony/balcony-view-4.jpeg', cap: 'バルコニー眺望4' },
+      { room: 'balcony', src: './assets/photos/balcony/balcony-roof-size.jpeg', cap: '屋上側 140x350メモ' }
+    ];
+
+    const canvas = document.getElementById('planCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let state = loadState();
+    applySharedStateFromUrl();
+    let selectedIndex = findSelectedIndex();
+    let photoRoomFilter = 'all';
+    let drag = null;
+    let renderCache = { dpr: 1, scale: 1, ox: 0, oy: 0, width: 0, height: 0 };
+
+    function getCSS(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function clone(v) {
+      return JSON.parse(JSON.stringify(v));
+    }
+
+    function normalizeState(data) {
+      return {
+        ...clone(defaultState),
+        ...data,
+        items: data.items || clone(defaultState.items),
+        money: data.money || clone(defaultState.money),
+        dispose: data.dispose || clone(defaultState.dispose),
+        tasksDone: data.tasksDone || {},
+        tasksExtra: data.tasksExtra || []
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return clone(defaultState);
+        const parsed = JSON.parse(raw);
+        return normalizeState(parsed);
+      } catch {
+        return clone(defaultState);
+      }
+    }
+
+    function encodeSharePayload(obj) {
+      const json = JSON.stringify(obj);
+      const utf8 = encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode('0x' + p1));
+      return btoa(utf8).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    }
+
+    function decodeSharePayload(s) {
+      try {
+        const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
+        const raw = atob(b64);
+        const encoded = Array.from(raw).map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+        const json = decodeURIComponent(encoded);
+        return JSON.parse(json);
+      } catch {
+        return null;
+      }
+    }
+
+    function applySharedStateFromUrl() {
+      const q = new URLSearchParams(location.search);
+      const share = q.get('share');
+      if (!share) return;
+      const decoded = decodeSharePayload(share);
+      if (!decoded) return;
+      state = normalizeState(decoded);
+      saveState();
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function findSelectedIndex() {
+      const idx = state.items.findIndex((x) => x.id === state.selectedItemId);
+      return idx >= 0 ? idx : 0;
+    }
+
+    function formatYen(v) {
+      return Number(v || 0).toLocaleString('ja-JP');
+    }
+
+    function toDateLabel(v) {
+      if (!v) return '未設定';
+      const d = new Date(v + 'T00:00:00');
+      if (Number.isNaN(d.getTime())) return '未設定';
+      return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function addDays(baseIso, diff) {
+      if (!baseIso) return '';
+      const d = new Date(baseIso + 'T00:00:00');
+      if (Number.isNaN(d.getTime())) return '';
+      d.setDate(d.getDate() + diff);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function getTasks() {
+      const fixed = baseTasks.map((t) => ({
+        id: t.id,
+        title: t.title,
+        owner: t.owner,
+        due: addDays(state.moveDate, t.offset),
+        done: Boolean(state.tasksDone[t.id]),
+        custom: false
+      }));
+
+      const extra = state.tasksExtra.map((t) => ({
+        id: t.id,
+        title: t.title,
+        owner: t.owner || '自分',
+        due: t.due || '',
+        done: Boolean(state.tasksDone[t.id]),
+        custom: true
+      }));
+
+      return [...fixed, ...extra].sort((a, b) => {
+        if (!a.due && !b.due) return 0;
+        if (!a.due) return 1;
+        if (!b.due) return -1;
+        return a.due.localeCompare(b.due);
+      });
+    }
+
+    function overlaps(a, b) {
+      return a.x < b.x + b.w && a.x + a.w > b.x && a.z < b.z + b.d && a.z + a.d > b.z;
+    }
+
+    function isInsideZone(item) {
+      const z = fitZones[item.zone];
+      if (!z) return true;
+      return item.x >= z.x && item.z >= z.z && item.x + item.w <= z.x + z.w && item.z + item.d <= z.z + z.d;
+    }
+
+    function diagnostics() {
+      const collisions = [];
+      const boundary = [];
+
+      for (let i = 0; i < state.items.length; i++) {
+        const a = state.items[i];
+        if (!isInsideZone(a)) boundary.push(a.name);
+        for (let j = i + 1; j < state.items.length; j++) {
+          const b = state.items[j];
+          if (overlaps(a, b)) collisions.push(`${a.name} × ${b.name}`);
+        }
+      }
+      return { collisions, boundary };
+    }
+
+    function setCanvasSize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      renderCache = { ...renderCache, dpr, width: rect.width, height: rect.height };
+
+      const pad = 22;
+      const worldW = worldExt.maxX - worldExt.minX;
+      const worldH = worldExt.maxZ - worldExt.minZ;
+      const scale = Math.min((rect.width - pad * 2) / worldW, (rect.height - pad * 2) / worldH);
+      const drawW = worldW * scale;
+      const drawH = worldH * scale;
+      const ox = (rect.width - drawW) / 2;
+      const oy = (rect.height - drawH) / 2;
+
+      renderCache.scale = scale;
+      renderCache.ox = ox;
+      renderCache.oy = oy;
+    }
+
+    function worldToScreen(x, z) {
+      const s = renderCache.scale;
+      const px = renderCache.ox + (x - worldExt.minX) * s;
+      const py = renderCache.oy + (worldExt.maxZ - z) * s;
+      return { x: px, y: py };
+    }
+
+    function screenToWorld(px, py) {
+      const s = renderCache.scale;
+      const x = worldExt.minX + (px - renderCache.ox) / s;
+      const z = worldExt.maxZ - (py - renderCache.oy) / s;
+      return { x, z };
+    }
+
+    function drawGrid() {
+      const s = renderCache.scale;
+      const minor = 10;
+      const major = 50;
+      const minX = worldExt.minX;
+      const maxX = worldExt.maxX;
+      const minZ = worldExt.minZ;
+      const maxZ = worldExt.maxZ;
+
+      for (let x = minX; x <= maxX; x += minor) {
+        const p1 = worldToScreen(x, minZ);
+        const p2 = worldToScreen(x, maxZ);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = x % major === 0 ? 'rgba(148,163,184,.35)' : 'rgba(148,163,184,.18)';
+        ctx.lineWidth = x % major === 0 ? 1.2 : .8;
+        ctx.stroke();
+      }
+
+      for (let z = minZ; z <= maxZ; z += minor) {
+        const p1 = worldToScreen(minX, z);
+        const p2 = worldToScreen(maxX, z);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = z % major === 0 ? 'rgba(148,163,184,.35)' : 'rgba(148,163,184,.18)';
+        ctx.lineWidth = z % major === 0 ? 1.2 : .8;
+        ctx.stroke();
+      }
+    }
+
+    function drawZoneRect(zone) {
+      const p1 = worldToScreen(zone.x, zone.z);
+      const p2 = worldToScreen(zone.x + zone.w, zone.z + zone.d);
+      const x = Math.min(p1.x, p2.x);
+      const y = Math.min(p1.y, p2.y);
+      const w = Math.abs(p2.x - p1.x);
+      const h = Math.abs(p2.y - p1.y);
+
+      ctx.fillStyle = zone.color;
+      ctx.strokeStyle = 'rgba(30,41,59,.35)';
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 12px "Avenir Next", "Hiragino Kaku Gothic ProN", sans-serif';
+      ctx.fillText(`${zone.name} ${zone.w}x${zone.d}`, x + 6, y + 15);
+    }
+
+    function drawFurniture(item, selected) {
+      const p1 = worldToScreen(item.x, item.z);
+      const p2 = worldToScreen(item.x + item.w, item.z + item.d);
+      const x = Math.min(p1.x, p2.x);
+      const y = Math.min(p1.y, p2.y);
+      const w = Math.abs(p2.x - p1.x);
+      const h = Math.abs(p2.y - p1.y);
+
+      ctx.fillStyle = item.color;
+      ctx.strokeStyle = selected ? '#111827' : 'rgba(17,24,39,.55)';
+      ctx.lineWidth = selected ? 2.4 : 1.2;
+      ctx.globalAlpha = selected ? 0.95 : 0.86;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+      ctx.globalAlpha = 1;
+
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '11px "Avenir Next", "Hiragino Kaku Gothic ProN", sans-serif';
+      ctx.fillText(item.name, x + 4, y + 13);
+    }
+
+    function drawDims() {
+      const pL = worldToScreen(0, 0);
+      const pR = worldToScreen(310, 0);
+      const pT = worldToScreen(0, 494);
+
+      ctx.strokeStyle = 'rgba(15,118,110,.8)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(pL.x, pL.y + 20);
+      ctx.lineTo(pR.x, pR.y + 20);
+      ctx.stroke();
+
+      ctx.fillStyle = '#0f766e';
+      ctx.font = 'bold 12px "Avenir Next", "Hiragino Kaku Gothic ProN", sans-serif';
+      ctx.fillText('310cm', (pL.x + pR.x) / 2 - 20, pL.y + 16);
+
+      ctx.beginPath();
+      ctx.moveTo(pL.x - 20, pL.y);
+      ctx.lineTo(pT.x - 20, pT.y);
+      ctx.stroke();
+      ctx.fillText('494cm', pL.x - 54, (pL.y + pT.y) / 2);
+    }
+
+    function drawPlan() {
+      ctx.clearRect(0, 0, renderCache.width, renderCache.height);
+      drawGrid();
+
+      drawZoneRect(zones.southBalcony);
+      drawZoneRect(zones.northBalcony);
+      drawZoneRect(zones.living);
+      drawZoneRect(zones.kitchen);
+      drawZoneRect(zones.wet);
+      drawZoneRect(zones.bedroom);
+
+      drawDims();
+
+      state.items.forEach((item, idx) => drawFurniture(item, idx === selectedIndex));
+    }
+
+    function hitTest(px, py) {
+      for (let i = state.items.length - 1; i >= 0; i--) {
+        const it = state.items[i];
+        const p1 = worldToScreen(it.x, it.z);
+        const p2 = worldToScreen(it.x + it.w, it.z + it.d);
+        const x = Math.min(p1.x, p2.x);
+        const y = Math.min(p1.y, p2.y);
+        const w = Math.abs(p2.x - p1.x);
+        const h = Math.abs(p2.y - p1.y);
+        if (px >= x && px <= x + w && py >= y && py <= y + h) return i;
+      }
+      return -1;
+    }
+
+    function updateInspector() {
+      const it = state.items[selectedIndex];
+      document.getElementById('selectedName').textContent = it ? it.name : '未選択';
+      document.getElementById('selectedZone').textContent = it ? `ゾーン: ${zones[it.zone]?.name || it.zone}` : 'ゾーン: -';
+      document.getElementById('selectedSize').textContent = it ? `寸法: ${it.w} x ${it.d} cm` : '寸法: -';
+
+      document.getElementById('inputX').value = it ? Math.round(it.x) : '';
+      document.getElementById('inputZ').value = it ? Math.round(it.z) : '';
+      document.getElementById('inputW').value = it ? Math.round(it.w) : '';
+      document.getElementById('inputD').value = it ? Math.round(it.d) : '';
+
+      const diag = diagnostics();
+      const ov = document.getElementById('statusOverlap');
+      const bd = document.getElementById('statusBoundary');
+
+      ov.textContent = diag.collisions.length ? `重なり: ${diag.collisions.join(' / ')}` : '重なりなし';
+      ov.className = diag.collisions.length ? 'status warn' : 'status ok';
+
+      bd.textContent = diag.boundary.length ? `はみ出し: ${diag.boundary.join(' / ')}` : 'はみ出しなし';
+      bd.className = diag.boundary.length ? 'status warn' : 'status ok';
+    }
+
+    function renderItemTable() {
+      const tbody = document.querySelector('#itemTable tbody');
+      const diag = diagnostics();
+
+      function stateText(item) {
+        const issues = [];
+        if (diag.boundary.includes(item.name)) issues.push('はみ出し');
+        if (diag.collisions.some((c) => c.includes(item.name))) issues.push('重なり');
+        return issues.length ? issues.join(' / ') : 'OK';
+      }
+
+      tbody.innerHTML = state.items.map((it, idx) => `
+        <tr data-idx="${idx}" class="${idx===selectedIndex?'selected':''}">
+          <td><button class="btn" data-act="sel">選択</button></td>
+          <td>${escapeHtml(it.name)}</td>
+          <td><span class="pill">${escapeHtml(zones[it.zone]?.name || it.zone)}</span></td>
+          <td>${it.w} x ${it.d}</td>
+          <td>${Math.round(it.x)}, ${Math.round(it.z)}</td>
+          <td>${stateText(it)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderCards() {
+      const fixed = state.money.filter((x) => x.status === '確定').reduce((s, x) => s + Number(x.amount || 0), 0);
+      const pending = state.money.filter((x) => x.status !== '確定').reduce((s, x) => s + Number(x.amount || 0), 0);
+      const delta = Number(state.budget || 0) - fixed;
+      const tasks = getTasks();
+      const done = tasks.filter((t) => t.done).length;
+      const notDone = tasks.length - done;
+
+      let dayText = '未設定';
+      if (state.moveDate) {
+        const today = new Date();
+        const t = new Date(`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}T00:00:00`);
+        const d = new Date(state.moveDate + 'T00:00:00');
+        const diff = Math.round((d - t) / 86400000);
+        dayText = diff >= 0 ? `あと${diff}日` : `${Math.abs(diff)}日経過`;
+      }
+
+      document.getElementById('cards').innerHTML = `
+        <article class="card"><div class="k">引っ越し日</div><div class="v">${toDateLabel(state.moveDate)}</div><div class="sub">${dayText}</div></article>
+        <article class="card"><div class="k">確定費用</div><div class="v">${formatYen(fixed)}円</div><div class="sub">支払前提</div></article>
+        <article class="card"><div class="k">検討中費用</div><div class="v">${formatYen(pending)}円</div><div class="sub">見積/未定</div></article>
+        <article class="card"><div class="k">予算差分</div><div class="v" style="color:${delta>=0?'#166534':'#b91c1c'}">${formatYen(delta)}円</div><div class="sub">予算 ${delta>=0?'内':'超過'}</div></article>
+        <article class="card"><div class="k">タスク進捗</div><div class="v">${done}/${tasks.length}</div><div class="sub">未完了 ${notDone}</div></article>
+        <article class="card"><div class="k">粗大ごみ件数</div><div class="v">${state.dispose.length}</div><div class="sub">${state.dispose.filter((x)=>x.status!=='完了').length}件未完</div></article>
+        <article class="card"><div class="k">家具配置</div><div class="v">${state.items.length}</div><div class="sub">平面図で調整中</div></article>
+        <article class="card"><div class="k">案件名</div><div class="v" style="font-size:17px;">${escapeHtml(state.projectName||'未設定')}</div><div class="sub">変更可</div></article>
+      `;
+    }
+
+    function renderMoney() {
+      const tbody = document.querySelector('#moneyTable tbody');
+      tbody.innerHTML = state.money.map((m, i) => `
+        <tr data-i="${i}">
+          <td><input type="text" data-k="name" value="${escapeHtml(m.name)}"></td>
+          <td><input type="text" data-k="category" value="${escapeHtml(m.category)}"></td>
+          <td><input type="number" data-k="amount" min="0" step="100" value="${Number(m.amount||0)}"></td>
+          <td>
+            <select data-k="status">
+              ${['確定','検討中','未定','保留'].map(s=>`<option ${m.status===s?'selected':''}>${s}</option>`).join('')}
+            </select>
+          </td>
+          <td><input type="text" data-k="note" value="${escapeHtml(m.note||'')}"></td>
+          <td><button class="btn" data-act="del">削除</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderDispose() {
+      const tbody = document.querySelector('#disposeTable tbody');
+      tbody.innerHTML = state.dispose.map((d, i) => `
+        <tr data-i="${i}">
+          <td><input type="text" data-k="name" value="${escapeHtml(d.name)}"></td>
+          <td><input type="text" data-k="size" value="${escapeHtml(d.size||'')}"></td>
+          <td><input type="number" data-k="fee" min="0" step="100" value="${Number(d.fee||0)}"></td>
+          <td>
+            <select data-k="status">
+              ${['未予約','予約済','搬出済','完了'].map(s=>`<option ${d.status===s?'selected':''}>${s}</option>`).join('')}
+            </select>
+          </td>
+          <td><input type="date" data-k="date" value="${d.date||''}"></td>
+          <td><button class="btn" data-act="del">削除</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderTimeline() {
+      const tasks = getTasks();
+      const box = document.getElementById('timeline');
+      box.innerHTML = tasks.map((t) => `
+        <div class="timeline-row ${t.done?'done':''}" data-id="${t.id}">
+          <div class="date">${t.due?toDateLabel(t.due):'日付未設定'}</div>
+          <div>
+            <div style="font-weight:700;">${escapeHtml(t.title)}</div>
+            <div class="muted">担当: ${escapeHtml(t.owner||'自分')} ${t.custom?'<span class="pill">追加</span>':''}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;justify-content:flex-end;">
+            <label style="margin:0;display:flex;gap:4px;align-items:center;font-size:11px;color:#334155;">
+              <input type="checkbox" data-act="done" ${t.done?'checked':''}>完了
+            </label>
+            ${t.custom?'<button class="btn" data-act="del">削除</button>':''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderPhotos() {
+      const grid = document.getElementById('photoGrid');
+      if (!grid) return;
+      const list = photoRoomFilter === 'all' ? photos : photos.filter((p) => p.room === photoRoomFilter);
+      grid.innerHTML = list.map((p) => `
+        <figure class="photo-card">
+          <img src="${p.src}" alt="${escapeHtml(p.cap)}" loading="lazy" />
+          <figcaption class="photo-cap">${escapeHtml(p.cap)}</figcaption>
+        </figure>
+      `).join('');
+    }
+
+    function buildShareLinkValue() {
+      state.notes = document.getElementById('notes').value;
+      state.shareBaseUrl = document.getElementById('shareBaseUrl').value.trim();
+      saveState();
+
+      const base = state.shareBaseUrl || (location.protocol.startsWith('http') ? `${location.origin}${location.pathname}` : '');
+      if (!base) return '';
+      const payload = encodeSharePayload(state);
+      return `${base}${base.includes('?') ? '&' : '?'}share=${payload}`;
+    }
+
+    async function copyText(text) {
+      if (!text) return false;
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch {}
+      const tmp = document.createElement('textarea');
+      tmp.value = text;
+      document.body.appendChild(tmp);
+      tmp.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(tmp);
+      return ok;
+    }
+
+    function renderTop() {
+      document.getElementById('moveDate').value = state.moveDate || '';
+      document.getElementById('budget').value = Number(state.budget || 0);
+      document.getElementById('projectName').value = state.projectName || '';
+      document.getElementById('notes').value = state.notes || '';
+      document.getElementById('shareBaseUrl').value = state.shareBaseUrl || '';
+      document.title = `${state.projectName || '引っ越しプランナー'} | 平面図で家具配置`;
+    }
+
+    function renderAll() {
+      setCanvasSize();
+      drawPlan();
+      updateInspector();
+      renderItemTable();
+      renderMoney();
+      renderDispose();
+      renderTimeline();
+      renderPhotos();
+      renderCards();
+      renderTop();
+    }
+
+    function snap(v) {
+      return Math.round(v);
+    }
+
+    function selectItem(idx) {
+      if (idx < 0 || idx >= state.items.length) return;
+      selectedIndex = idx;
+      state.selectedItemId = state.items[idx].id;
+      saveState();
+      renderAll();
+    }
+
+    function escapeHtml(s) {
+      return String(s || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function bindCanvas() {
+      canvas.addEventListener('pointerdown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const hit = hitTest(x, y);
+        if (hit === -1) return;
+
+        selectItem(hit);
+
+        const it = state.items[hit];
+        const world = screenToWorld(x, y);
+        drag = {
+          idx: hit,
+          ox: world.x - it.x,
+          oz: world.z - it.z,
+          id: e.pointerId
+        };
+        canvas.classList.add('dragging');
+        canvas.setPointerCapture(e.pointerId);
+      });
+
+      canvas.addEventListener('pointermove', (e) => {
+        if (!drag) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const world = screenToWorld(x, y);
+
+        const it = state.items[drag.idx];
+        it.x = snap(world.x - drag.ox);
+        it.z = snap(world.z - drag.oz);
+
+        drawPlan();
+        updateInspector();
+        renderItemTable();
+      });
+
+      function endDrag(e) {
+        if (!drag) return;
+        if (e.pointerId !== drag.id) return;
+        drag = null;
+        canvas.classList.remove('dragging');
+        saveState();
+      }
+
+      canvas.addEventListener('pointerup', endDrag);
+      canvas.addEventListener('pointercancel', endDrag);
+    }
+
+    function bindUI() {
+      function switchTab(name) {
+        const btn = document.querySelector(`.tab[data-tab="${name}"]`);
+        if (!btn) return;
+        document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t === btn));
+        document.querySelectorAll('.section').forEach((s) => s.classList.remove('active'));
+        document.getElementById(`sec-${name}`).classList.add('active');
+      }
+
+      document.getElementById('saveTop').addEventListener('click', () => {
+        state.moveDate = document.getElementById('moveDate').value;
+        state.budget = Number(document.getElementById('budget').value || 0);
+        state.projectName = document.getElementById('projectName').value.trim();
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById('openLegacy3d').addEventListener('click', () => {
+        window.open('./v2/floorplan-3d.html', '_blank', 'noopener');
+      });
+
+      document.getElementById('jumpShare').addEventListener('click', () => {
+        switchTab('notes');
+      });
+
+      document.getElementById('applyItem').addEventListener('click', () => {
+        const it = state.items[selectedIndex];
+        if (!it) return;
+        it.x = Number(document.getElementById('inputX').value || it.x);
+        it.z = Number(document.getElementById('inputZ').value || it.z);
+        it.w = Math.max(1, Number(document.getElementById('inputW').value || it.w));
+        it.d = Math.max(1, Number(document.getElementById('inputD').value || it.d));
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById('rotateItem').addEventListener('click', () => {
+        const it = state.items[selectedIndex];
+        if (!it) return;
+        const tmp = it.w;
+        it.w = it.d;
+        it.d = tmp;
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById('resetPlan').addEventListener('click', () => {
+        state.items = clone(defaultState.items);
+        state.selectedItemId = defaultState.selectedItemId;
+        selectedIndex = findSelectedIndex();
+        saveState();
+        renderAll();
+      });
+
+      document.querySelector('#itemTable tbody').addEventListener('click', (e) => {
+        if (e.target.dataset.act !== 'sel') return;
+        const tr = e.target.closest('tr[data-idx]');
+        if (!tr) return;
+        selectItem(Number(tr.dataset.idx));
+      });
+
+      document.getElementById('addMoney').addEventListener('click', () => {
+        state.money.push({ name: '', category: '', amount: 0, status: '未定', note: '' });
+        saveState();
+        renderAll();
+      });
+
+      document.querySelector('#moneyTable tbody').addEventListener('input', (e) => {
+        const tr = e.target.closest('tr[data-i]');
+        if (!tr) return;
+        const i = Number(tr.dataset.i);
+        const k = e.target.dataset.k;
+        if (!k) return;
+        state.money[i][k] = k === 'amount' ? Number(e.target.value || 0) : e.target.value;
+        saveState();
+        renderCards();
+      });
+
+      document.querySelector('#moneyTable tbody').addEventListener('click', (e) => {
+        if (e.target.dataset.act !== 'del') return;
+        const tr = e.target.closest('tr[data-i]');
+        if (!tr) return;
+        state.money.splice(Number(tr.dataset.i), 1);
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById('addDispose').addEventListener('click', () => {
+        state.dispose.push({ name: '', size: '', fee: 0, status: '未予約', date: '' });
+        saveState();
+        renderAll();
+      });
+
+      document.querySelector('#disposeTable tbody').addEventListener('input', (e) => {
+        const tr = e.target.closest('tr[data-i]');
+        if (!tr) return;
+        const i = Number(tr.dataset.i);
+        const k = e.target.dataset.k;
+        if (!k) return;
+        state.dispose[i][k] = k === 'fee' ? Number(e.target.value || 0) : e.target.value;
+        saveState();
+        renderCards();
+      });
+
+      document.querySelector('#disposeTable tbody').addEventListener('click', (e) => {
+        if (e.target.dataset.act !== 'del') return;
+        const tr = e.target.closest('tr[data-i]');
+        if (!tr) return;
+        state.dispose.splice(Number(tr.dataset.i), 1);
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById('addTask').addEventListener('click', () => {
+        const title = document.getElementById('newTaskTitle').value.trim();
+        if (!title) return;
+        state.tasksExtra.push({
+          id: `t-${Date.now()}-${Math.floor(Math.random()*999)}`,
+          title,
+          due: document.getElementById('newTaskDate').value,
+          owner: document.getElementById('newTaskOwner').value.trim()
+        });
+        document.getElementById('newTaskTitle').value = '';
+        document.getElementById('newTaskDate').value = '';
+        document.getElementById('newTaskOwner').value = '';
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById('timeline').addEventListener('click', (e) => {
+        const row = e.target.closest('.timeline-row[data-id]');
+        if (!row) return;
+        const id = row.dataset.id;
+
+        if (e.target.dataset.act === 'done') {
+          state.tasksDone[id] = e.target.checked;
+          saveState();
+          renderAll();
+          return;
+        }
+
+        if (e.target.dataset.act === 'del') {
+          state.tasksExtra = state.tasksExtra.filter((x) => x.id !== id);
+          delete state.tasksDone[id];
+          saveState();
+          renderAll();
+        }
+      });
+
+      document.getElementById('saveNotes').addEventListener('click', () => {
+        state.notes = document.getElementById('notes').value;
+        saveState();
+      });
+
+      document.getElementById('buildShareLink').addEventListener('click', () => {
+        const link = buildShareLinkValue();
+        document.getElementById('shareLink').value = link || 'まず公開URLを入力してください（file:// のままでは共有不可）';
+      });
+
+      document.getElementById('copyShareLink').addEventListener('click', async () => {
+        const input = document.getElementById('shareLink');
+        if (!input.value) {
+          const link = buildShareLinkValue();
+          input.value = link || '';
+        }
+        if (!input.value) return;
+        const ok = await copyText(input.value);
+        if (!ok) alert('コピーに失敗しました');
+      });
+
+      document.getElementById('exportJson').addEventListener('click', () => {
+        state.notes = document.getElementById('notes').value;
+        saveState();
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const now = new Date();
+        const f = `move-planner-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.json`;
+        a.href = url;
+        a.download = f;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById('importJson').addEventListener('change', async (e) => {
+        const f = e.target.files?.[0];
+        if (!f) return;
+        try {
+          const txt = await f.text();
+          const data = JSON.parse(txt);
+          state = normalizeState(data);
+          selectedIndex = findSelectedIndex();
+          saveState();
+          renderAll();
+        } catch {
+          alert('JSON読み込みに失敗しました');
+        }
+        e.target.value = '';
+      });
+
+      document.getElementById('photoFilters').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-room]');
+        if (!btn) return;
+        photoRoomFilter = btn.dataset.room;
+        document.querySelectorAll('#photoFilters .btn').forEach((b) => b.classList.toggle('active', b === btn));
+        renderPhotos();
+      });
+
+      document.getElementById('tabs').addEventListener('click', (e) => {
+        const btn = e.target.closest('.tab[data-tab]');
+        if (!btn) return;
+        switchTab(btn.dataset.tab);
+      });
+
+      window.addEventListener('resize', () => {
+        setCanvasSize();
+        drawPlan();
+      });
+    }
+
+    bindCanvas();
+    bindUI();
+    renderAll();
+  </script>
+</body>
+</html>

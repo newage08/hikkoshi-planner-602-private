@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ル・リオン東京 602 | 3D間取り図</title>
+  <style>
+    :root {
+      --bg: #e8edf3;
+      --card: #ffffffe6;
+      --ink: #111827;
+      --muted: #4b5563;
+      --line: #cbd5e1;
+      --ok: #065f46;
+      --warn: #991b1b;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: radial-gradient(circle at 20% 10%, #f6f8fb, #d9e2ec 60%, #cfd8e3);
+      color: var(--ink);
+      font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+      overflow: hidden;
+    }
+    #app { width: 100%; height: 100%; position: relative; }
+    #scene {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    #scene.dragging { cursor: grabbing; }
+
+    .hud {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      z-index: 10;
+      width: min(560px, calc(100vw - 24px));
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, .15);
+    }
+    .hud h1 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      letter-spacing: .2px;
+    }
+    .hud p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .meta {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: #fff;
+    }
+    .chip.link {
+      text-decoration: none;
+      color: #0f766e;
+      font-weight: 700;
+      border-color: #99f6e4;
+      background: #ecfeff;
+    }
+
+    .side {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      z-index: 10;
+      width: min(360px, calc(100vw - 24px));
+      max-height: calc(100vh - 130px);
+      overflow: auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, .15);
+      backdrop-filter: blur(4px);
+    }
+    .side h2 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+    .side ul {
+      margin: 0;
+      padding-left: 16px;
+      font-size: 12px;
+      color: #374151;
+      display: grid;
+      gap: 4px;
+      line-height: 1.4;
+    }
+    .ok { color: var(--ok); font-weight: 700; }
+    .warn { color: var(--warn); font-weight: 700; }
+
+    .toolbar {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, .12);
+      backdrop-filter: blur(4px);
+    }
+    .toolbar button {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      font-size: 12px;
+      padding: 7px 10px;
+      cursor: pointer;
+    }
+    .toolbar button.active {
+      background: #111827;
+      color: #fff;
+      border-color: #111827;
+    }
+
+    @media (max-width: 980px) {
+      .side {
+        top: auto;
+        bottom: 78px;
+        max-height: 36vh;
+      }
+      .hud h1 { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene"></canvas>
+
+    <section class="hud">
+      <h1>ル・リオン東京 602 3D間取り図（単体HTML版）</h1>
+      <p>外部ライブラリなし。<code>file://</code>でもボタンが確実に動くように再構成しました。</p>
+      <div class="meta">
+        <span class="chip">リビング: 494 x 310</span>
+        <span class="chip">床: LPF711風</span>
+        <span class="chip">ベッド: 寝室のみ</span>
+        <a class="chip link" href="../move-control-center.html">統合Webアプリへ</a>
+      </div>
+    </section>
+
+    <aside class="side">
+      <h2>反映状況</h2>
+      <ul>
+        <li>手書き間取りのL字外形を再構築</li>
+        <li>公式寸法: LOWYA TV台/デスク, IKEAソファ, PETKIT PuraMax2</li>
+        <li id="overlapStatus" class="ok">重なりチェック中...</li>
+        <li id="boundaryStatus" class="ok">部屋外はみ出しチェック中...</li>
+      </ul>
+    </aside>
+
+    <div class="toolbar" id="toolbar">
+      <button data-view="top">真上</button>
+      <button data-view="iso" class="active">斜め</button>
+      <button data-view="living">リビング目線</button>
+      <button data-view="bedroom">寝室目線</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('scene');
+    const ctx = canvas.getContext('2d');
+    const overlapStatus = document.getElementById('overlapStatus');
+    const boundaryStatus = document.getElementById('boundaryStatus');
+
+    const DIM = {
+      livingW: 310,
+      livingD: 494,
+      stripW: 317,
+      stripD: 116,
+      wetW: 79,
+      northD: 216,
+      southBalconyW: 238,
+      southBalconyD: 166,
+      northBalconyW: 238,
+      northBalconyD: 140,
+      wallH: 235
+    };
+
+    const Z_LIVING_END = DIM.livingD;
+    const Z_STRIP_END = DIM.livingD + DIM.stripD;
+    const Z_NORTH_END = Z_STRIP_END + DIM.northD;
+    const southBalconyX = (DIM.livingW - DIM.southBalconyW) / 2;
+
+    const rooms = {
+      living: { x: 0, z: 0, w: DIM.livingW, d: DIM.livingD },
+      strip: { x: 0, z: Z_LIVING_END, w: DIM.stripW, d: DIM.stripD },
+      wet: { x: 0, z: Z_STRIP_END, w: DIM.wetW, d: DIM.northD },
+      bedroom: { x: DIM.wetW, z: Z_STRIP_END, w: DIM.stripW - DIM.wetW, d: DIM.northD },
+      southBalcony: { x: southBalconyX, z: -DIM.southBalconyD, w: DIM.southBalconyW, d: DIM.southBalconyD },
+      northBalcony: { x: DIM.wetW, z: Z_NORTH_END, w: DIM.northBalconyW, d: DIM.northBalconyD }
+    };
+
+    const footprints = {
+      living: [[0,0],[DIM.livingW,0],[DIM.livingW,DIM.livingD],[0,DIM.livingD]],
+      strip: [[0,Z_LIVING_END],[DIM.livingW,Z_LIVING_END],[DIM.stripW,Z_LIVING_END+7],[DIM.stripW,Z_STRIP_END],[0,Z_STRIP_END]],
+      wet: [[0,Z_STRIP_END],[DIM.wetW,Z_STRIP_END],[DIM.wetW,Z_NORTH_END],[0,Z_NORTH_END]],
+      bedroom: [[DIM.wetW,Z_STRIP_END],[DIM.stripW,Z_STRIP_END],[DIM.stripW,Z_NORTH_END],[DIM.wetW,Z_NORTH_END]],
+      southBalcony: [[rooms.southBalcony.x,rooms.southBalcony.z],[rooms.southBalcony.x+rooms.southBalcony.w,rooms.southBalcony.z],[rooms.southBalcony.x+rooms.southBalcony.w,0],[rooms.southBalcony.x,0]],
+      northBalcony: [[DIM.wetW,Z_NORTH_END],[DIM.wetW+DIM.northBalconyW,Z_NORTH_END],[DIM.wetW+DIM.northBalconyW,Z_NORTH_END+DIM.northBalconyD],[DIM.wetW,Z_NORTH_END+DIM.northBalconyD]]
+    };
+
+    const furniture = [
+      { name: 'TVスタンド', room: 'living', x: 10, z: 210, w: 120, d: 33, h: 116, color: '#f59e0b' },
+      { name: 'デスク', room: 'living', x: 10, z: 390, w: 120, d: 70, h: 70, color: '#fbbf24' },
+      { name: 'ソファ', room: 'living', x: 148, z: 118, w: 152, d: 76, h: 73, color: '#3b82f6' },
+      { name: 'PuraMax2', room: 'living', x: 235, z: 390, w: 62, d: 54, h: 55, color: '#ef4444' },
+      { name: 'Solo', room: 'living', x: 214, z: 445, w: 19, d: 32, h: 30, color: '#dc2626' },
+      { name: '給水', room: 'living', x: 236, z: 450, w: 23, d: 23, h: 15, color: '#f87171' },
+      { name: 'Eufy', room: 'living', x: 250, z: 40, w: 45, d: 45, h: 40, color: '#64748b' },
+      { name: '鏡', room: 'living', x: 300, z: 260, w: 8, d: 30, h: 193, color: '#9ca3af' },
+      { name: 'ハンガー', room: 'living', x: 272, z: 310, w: 30, d: 58, h: 150, color: '#94a3b8' },
+      { name: 'キャットタワー候補', room: 'living', x: 230, z: 210, w: 60, d: 60, h: 165, color: '#93c5fd' },
+      { name: 'ベッド(寝室)', room: 'bedroom', x: 120, z: 620, w: 140, d: 200, h: 35, color: '#60a5fa' }
+    ];
+
+    function overlap(a, b) {
+      return a.x < b.x + b.w && a.x + a.w > b.x && a.z < b.z + b.d && a.z + a.d > b.z;
+    }
+
+    function calcOverlap(items) {
+      const hits = [];
+      const living = items.filter(i => i.room === 'living');
+      for (let i = 0; i < living.length; i++) {
+        for (let j = i + 1; j < living.length; j++) {
+          if (overlap(living[i], living[j])) hits.push(`${living[i].name} × ${living[j].name}`);
+        }
+      }
+      return hits;
+    }
+
+    function calcBoundary(items) {
+      return items.filter(item => {
+        const r = rooms[item.room];
+        return !(item.x >= r.x && item.z >= r.z && item.x + item.w <= r.x + r.w && item.z + item.d <= r.z + r.d);
+      }).map(i => i.name);
+    }
+
+    const overlapHits = calcOverlap(furniture);
+    const boundaryHits = calcBoundary(furniture);
+
+    overlapStatus.textContent = overlapHits.length ? `重なりあり: ${overlapHits.join(' / ')}` : '重なりなし';
+    overlapStatus.className = overlapHits.length ? 'warn' : 'ok';
+
+    boundaryStatus.textContent = boundaryHits.length ? `部屋外はみ出し: ${boundaryHits.join(' / ')}` : '部屋外はみ出しなし';
+    boundaryStatus.className = boundaryHits.length ? 'warn' : 'ok';
+
+    const viewPresets = {
+      top:     { yaw: 0,       pitch: 1.56, zoom: 1700, dist: 1500, center: { x: 160, z: 430 } },
+      iso:     { yaw: -0.85,   pitch: 0.73, zoom: 2100, dist: 2000, center: { x: 160, z: 430 } },
+      living:  { yaw: -0.12,   pitch: 0.62, zoom: 2200, dist: 1900, center: { x: 155, z: 250 } },
+      bedroom: { yaw: -1.24,   pitch: 0.68, zoom: 2200, dist: 1900, center: { x: 200, z: 730 } }
+    };
+
+    const view = { ...viewPresets.iso, width: 0, height: 0, dragStart: null };
+
+    function resize() {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      view.width = w;
+      view.height = h;
+      draw();
+    }
+
+    function project(x, y, z) {
+      const cx = x - view.center.x;
+      const cz = z - view.center.z;
+
+      const sy = Math.sin(view.yaw);
+      const cy = Math.cos(view.yaw);
+      const x1 = cx * cy - cz * sy;
+      const z1 = cx * sy + cz * cy;
+
+      const sp = Math.sin(view.pitch);
+      const cp = Math.cos(view.pitch);
+      const y1 = y * cp - z1 * sp;
+      const z2 = y * sp + z1 * cp;
+
+      const depth = z2 + view.dist;
+      const k = view.zoom / Math.max(260, depth);
+
+      return {
+        x: view.width * 0.5 + x1 * k,
+        y: view.height * 0.6 - y1 * k,
+        depth
+      };
+    }
+
+    function shade(hex, factor) {
+      const h = hex.replace('#', '');
+      const r = parseInt(h.slice(0, 2), 16);
+      const g = parseInt(h.slice(2, 4), 16);
+      const b = parseInt(h.slice(4, 6), 16);
+      const rr = Math.max(0, Math.min(255, Math.round(r * factor)));
+      const gg = Math.max(0, Math.min(255, Math.round(g * factor)));
+      const bb = Math.max(0, Math.min(255, Math.round(b * factor)));
+      return `rgb(${rr},${gg},${bb})`;
+    }
+
+    function addFace(faces, points3d, color, stroke = 'rgba(17,24,39,0.22)', alpha = 1) {
+      const pts = points3d.map(p => project(p.x, p.y, p.z));
+      const depth = pts.reduce((a, p) => a + p.depth, 0) / pts.length;
+      faces.push({ pts, depth, color, stroke, alpha });
+    }
+
+    function addPrism(faces, x, z, w, d, h, baseColor, alpha = 0.95) {
+      const p = {
+        a: { x, y: 0, z },
+        b: { x: x + w, y: 0, z },
+        c: { x: x + w, y: 0, z: z + d },
+        d: { x, y: 0, z: z + d },
+        e: { x, y: h, z },
+        f: { x: x + w, y: h, z },
+        g: { x: x + w, y: h, z: z + d },
+        h: { x, y: h, z: z + d }
+      };
+
+      addFace(faces, [p.a, p.b, p.c, p.d], shade(baseColor, 0.92), 'rgba(0,0,0,0.15)', alpha * 0.82);
+      addFace(faces, [p.e, p.f, p.g, p.h], shade(baseColor, 1.1), 'rgba(0,0,0,0.2)', alpha);
+      addFace(faces, [p.a, p.b, p.f, p.e], shade(baseColor, 0.82), 'rgba(0,0,0,0.2)', alpha * 0.95);
+      addFace(faces, [p.b, p.c, p.g, p.f], shade(baseColor, 0.7), 'rgba(0,0,0,0.2)', alpha * 0.95);
+      addFace(faces, [p.c, p.d, p.h, p.g], shade(baseColor, 0.78), 'rgba(0,0,0,0.2)', alpha * 0.95);
+      addFace(faces, [p.d, p.a, p.e, p.h], shade(baseColor, 0.88), 'rgba(0,0,0,0.2)', alpha * 0.95);
+    }
+
+    function drawLabel(text, x, y, z) {
+      const p = project(x, y, z);
+      ctx.fillStyle = 'rgba(255,255,255,0.86)';
+      ctx.strokeStyle = 'rgba(17,24,39,0.25)';
+      ctx.lineWidth = 1;
+      const padX = 6;
+      const h = 16;
+      ctx.font = '11px "Hiragino Sans", "Yu Gothic", sans-serif';
+      const w = ctx.measureText(text).width + padX * 2;
+      ctx.beginPath();
+      ctx.rect(p.x - w / 2, p.y - h / 2, w, h);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#111827';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, p.x, p.y + 0.5);
+    }
+
+    function drawBackgroundGrid() {
+      ctx.strokeStyle = 'rgba(30,41,59,0.08)';
+      ctx.lineWidth = 1;
+      for (let i = -8; i <= 8; i++) {
+        const x = i * 100;
+        const p1 = project(x, 0, -250);
+        const p2 = project(x, 0, 1200);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+      for (let i = -3; i <= 14; i++) {
+        const z = i * 100;
+        const p1 = project(-350, 0, z);
+        const p2 = project(650, 0, z);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, view.width, view.height);
+      drawBackgroundGrid();
+
+      const faces = [];
+
+      // Floors
+      addFace(faces, footprints.living.map(([x, z]) => ({ x, y: 1.5, z })), '#848079', 'rgba(0,0,0,0.18)', 1);
+      addFace(faces, footprints.strip.map(([x, z]) => ({ x, y: 1.2, z })), '#fde68a', 'rgba(0,0,0,0.12)', 0.75);
+      addFace(faces, footprints.wet.map(([x, z]) => ({ x, y: 1.2, z })), '#f9a8d4', 'rgba(0,0,0,0.12)', 0.75);
+      addFace(faces, footprints.bedroom.map(([x, z]) => ({ x, y: 1.2, z })), '#bbf7d0', 'rgba(0,0,0,0.12)', 0.75);
+      addFace(faces, footprints.southBalcony.map(([x, z]) => ({ x, y: 1.1, z })), '#d1d5db', 'rgba(0,0,0,0.12)', 0.8);
+      addFace(faces, footprints.northBalcony.map(([x, z]) => ({ x, y: 1.1, z })), '#d1d5db', 'rgba(0,0,0,0.12)', 0.8);
+
+      // Outer walls (south wall has center opening)
+      const wallColor = '#f8fafc';
+      addPrism(faces, 0, 0, southBalconyX, 8, DIM.wallH, wallColor, 0.96);
+      addPrism(faces, southBalconyX + DIM.southBalconyW, 0, DIM.livingW - (southBalconyX + DIM.southBalconyW), 8, DIM.wallH, wallColor, 0.96);
+
+      addPrism(faces, DIM.livingW - 8, 0, 8, Z_LIVING_END, DIM.wallH, wallColor, 0.96);
+      addPrism(faces, DIM.stripW - 8, Z_LIVING_END + 7, 8, DIM.stripD - 7, DIM.wallH, wallColor, 0.96);
+      addPrism(faces, DIM.wetW, Z_STRIP_END - 8, DIM.stripW - DIM.wetW, 8, DIM.wallH, wallColor, 0.96);
+      addPrism(faces, DIM.wetW - 8, Z_STRIP_END, 8, DIM.northD, DIM.wallH, wallColor, 0.96);
+      addPrism(faces, 0, Z_NORTH_END - 8, DIM.wetW, 8, DIM.wallH, wallColor, 0.96);
+      addPrism(faces, 0, 0, 8, Z_NORTH_END, DIM.wallH, wallColor, 0.96);
+
+      // Furniture
+      for (const item of furniture) {
+        addPrism(faces, item.x, item.z, item.w, item.d, item.h, item.color, 0.9);
+      }
+
+      faces.sort((a, b) => b.depth - a.depth);
+
+      for (const face of faces) {
+        ctx.globalAlpha = face.alpha;
+        ctx.fillStyle = face.color;
+        ctx.strokeStyle = face.stroke;
+        ctx.beginPath();
+        ctx.moveTo(face.pts[0].x, face.pts[0].y);
+        for (let i = 1; i < face.pts.length; i++) ctx.lineTo(face.pts[i].x, face.pts[i].y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      drawLabel('リビング 494x310', 155, 20, 245);
+      drawLabel('キッチン帯', 160, 20, 552);
+      drawLabel('洗面・浴室・トイレ', 42, 20, 720);
+      drawLabel('寝室', 195, 20, 720);
+
+      for (const item of furniture) {
+        drawLabel(item.name, item.x + item.w / 2, item.h + 10, item.z + item.d / 2);
+      }
+    }
+
+    function setView(name) {
+      const preset = viewPresets[name];
+      if (!preset) return;
+      view.yaw = preset.yaw;
+      view.pitch = preset.pitch;
+      view.zoom = preset.zoom;
+      view.dist = preset.dist;
+      view.center = { x: preset.center.x, z: preset.center.z };
+      document.querySelectorAll('#toolbar button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === name);
+      });
+      draw();
+    }
+
+    document.getElementById('toolbar').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-view]');
+      if (!btn) return;
+      setView(btn.dataset.view);
+    });
+
+    // drag orbit
+    canvas.addEventListener('pointerdown', (e) => {
+      view.dragStart = { x: e.clientX, y: e.clientY, yaw: view.yaw, pitch: view.pitch };
+      canvas.classList.add('dragging');
+      canvas.setPointerCapture(e.pointerId);
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!view.dragStart) return;
+      const dx = e.clientX - view.dragStart.x;
+      const dy = e.clientY - view.dragStart.y;
+      view.yaw = view.dragStart.yaw + dx * 0.005;
+      view.pitch = Math.max(0.25, Math.min(1.56, view.dragStart.pitch + dy * 0.005));
+      draw();
+    });
+
+    canvas.addEventListener('pointerup', () => {
+      view.dragStart = null;
+      canvas.classList.remove('dragging');
+    });
+    canvas.addEventListener('pointercancel', () => {
+      view.dragStart = null;
+      canvas.classList.remove('dragging');
+    });
+
+    // wheel zoom
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const k = e.deltaY > 0 ? 0.92 : 1.08;
+      view.zoom = Math.max(900, Math.min(3800, view.zoom * k));
+      draw();
+    }, { passive: false });
+
+    window.addEventListener('resize', resize);
+    resize();
+  </script>
+</body>
+</html>
