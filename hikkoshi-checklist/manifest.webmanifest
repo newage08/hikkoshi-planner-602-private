@@ -1,0 +1,17 @@
+{
+  "name": "引っ越し全体チェック",
+  "short_name": "引っ越し",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f5f1",
+  "theme_color": "#0f7c80",
+  "description": "引っ越し準備を日付未確定でも進めるためのチェックアプリ",
+  "icons": [
+    {
+      "src": "./icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

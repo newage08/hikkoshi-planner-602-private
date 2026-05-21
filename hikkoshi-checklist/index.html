@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>引っ越し全体チェック</title>
+    <meta
+      name="description"
+      content="日付未確定でも進める作業と、確定日に一気に実行する作業を分けて管理する引っ越し用チェックアプリ"
+    />
+    <meta name="theme-color" content="#0f7c80" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <p class="eyebrow">Moving Control Board</p>
+        <h1>引っ越し全体チェック</h1>
+        <p class="hero-copy">
+          契約開始日と鍵渡し日が確定したので、6/12基準で実行タスクを前倒しで完了させる。
+        </p>
+        <p class="hero-lock">契約開始日・鍵渡し日: 2026-06-12（金）確定</p>
+        <div class="hero-stats">
+          <div>
+            <span id="doneCount">0</span>
+            <small>完了</small>
+          </div>
+          <div>
+            <span id="todoCount">0</span>
+            <small>未完了</small>
+          </div>
+          <div>
+            <span id="progressPercent">0%</span>
+            <small>進捗</small>
+          </div>
+        </div>
+        <div class="progress-wrap" aria-label="全体進捗">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+      </header>
+
+      <section class="panel dates">
+        <h2>日程メモ（6/12確定済み）</h2>
+        <div class="date-grid">
+          <label>契約開始日<input type="date" id="contractDate" disabled /></label>
+          <label>鍵渡し日<input type="date" id="keyDate" disabled /></label>
+          <label>引っ越し日<input type="date" id="moveDate" /></label>
+          <label>退去日<input type="date" id="leaveDate" /></label>
+        </div>
+        <p id="deadlineHint" class="hint"></p>
+      </section>
+
+      <section class="panel filters">
+        <h2>表示切り替え</h2>
+        <div class="chip-group" role="tablist" aria-label="表示切り替え">
+          <button class="chip is-active" data-filter="all">全体</button>
+          <button class="chip" data-filter="now">今すぐ進める</button>
+          <button class="chip" data-filter="fixed">日付確定日に実行</button>
+          <button class="chip" data-filter="day">引っ越し当日</button>
+          <button class="chip" data-filter="risk">リスク監視</button>
+        </div>
+      </section>
+
+      <section class="panel add-task">
+        <h2>追加タスク</h2>
+        <div class="add-grid">
+          <input id="taskTitle" type="text" placeholder="例: ガス開栓の立会い時間を確定" />
+          <select id="taskCategory"></select>
+          <select id="taskPhase">
+            <option value="now">今すぐ進める</option>
+            <option value="fixed">日付確定日に実行</option>
+            <option value="day">引っ越し当日</option>
+            <option value="risk">リスク監視</option>
+          </select>
+          <button id="addTaskBtn" class="primary">追加</button>
+        </div>
+      </section>
+
+      <section id="taskBoard" class="board" aria-live="polite"></section>
+
+      <section class="panel tools">
+        <h2>Git共同チェック / 保守</h2>
+        <div class="tool-buttons">
+          <button id="exportGitBtn">Git共有JSON書き出し</button>
+          <button id="loadGitBtn">Git共有JSON読込</button>
+          <button id="exportBtn">書き出し</button>
+          <label for="importInput" class="button-like">読み込み</label>
+          <input id="importInput" type="file" accept="application/json" />
+          <button id="resetBtn" class="danger">初期化</button>
+        </div>
+        <p class="hint">Git共有ファイル: <code>shared/checklist_state.json</code>（同じブランチをpullすれば同じ状態を読込可能）</p>
+      </section>
+    </main>
+
+    <template id="taskTemplate">
+      <article class="task-row">
+        <label>
+          <input type="checkbox" />
+          <span class="title"></span>
+        </label>
+        <p class="note"></p>
+      </article>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
