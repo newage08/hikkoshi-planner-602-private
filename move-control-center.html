@@ -981,6 +981,41 @@
       word-break: break-all;
     }
 
+    .cloud-box {
+      margin-top: 10px;
+      border: 1px solid rgba(17, 24, 39, .1);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .92);
+      padding: 9px;
+    }
+
+    .cloud-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 1.2fr .8fr;
+      margin-top: 8px;
+    }
+
+    .cloud-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid rgba(17, 24, 39, .12);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .96);
+      padding: 10px 11px;
+      font-size: 12px;
+      color: #475569;
+      font-weight: 700;
+    }
+
+    .cloud-toggle input[type="checkbox"] {
+      margin: 0;
+      width: 17px;
+      height: 17px;
+      accent-color: #0a84ff;
+    }
+
     .guide-target {
       animation: guidePulse 1.1s ease;
     }
@@ -997,6 +1032,7 @@
       .guide-progress-text { text-align: left; }
       .guide-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .plan-layout { grid-template-columns: 1fr; }
+      .cloud-grid { grid-template-columns: 1fr; }
       #planCanvas { min-height: 680px; height: 76vh; max-height: 960px; }
     }
 
@@ -1321,6 +1357,27 @@
               <input id="shareLink" class="share-link" readonly value="" />
             </div>
 
+            <div class="cloud-box">
+              <div class="muted">Cloud Save（端末消去でも復元）</div>
+              <div class="cloud-grid">
+                <div>
+                  <label for="cloudToken">GitHub Token (repo)</label>
+                  <input id="cloudToken" type="password" placeholder="github_pat_..." autocomplete="off" />
+                </div>
+                <label class="cloud-toggle">
+                  <input id="cloudAutoSync" type="checkbox" />
+                  <span>Auto Save</span>
+                </label>
+              </div>
+              <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn primary" id="cloudSaveNow">Save Cloud</button>
+                <button class="btn" id="cloudLoadNow">Load Cloud</button>
+                <button class="btn" id="cloudRemember">Remember Token</button>
+                <button class="btn warn" id="cloudForget">Forget Token</button>
+              </div>
+              <div class="mini" id="cloudStatus" style="margin-top:7px;">Cloud: Not configured</div>
+            </div>
+
             <label style="margin-top:10px;">Backup</label>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <button class="btn" id="exportJson">Export</button>
@@ -1335,6 +1392,15 @@
 
   <script>
     const STORAGE_KEY = 'movePlanner_topview_v1';
+    const SYNC_CONFIG_KEY = 'movePlanner_topview_cloud_sync_v1';
+    const GITHUB_API_VERSION = '2022-11-28';
+    const REMOTE_SYNC = {
+      owner: 'newage08',
+      repo: 'hikkoshi-planner-602-private',
+      branch: 'main',
+      path: 'shared/move_control_center_state.json'
+    };
+    const REMOTE_CONTENTS_URL = `https://api.github.com/repos/${REMOTE_SYNC.owner}/${REMOTE_SYNC.repo}/contents/${REMOTE_SYNC.path}`;
 
     const defaultState = {
       projectName: 'ル・リオン東京 602 引っ越し',
@@ -1342,6 +1408,7 @@
       budget: 450000,
       notes: '',
       shareBaseUrl: '',
+      savedAt: '',
       activeRoom: 'living',
       selectedItemId: 'tv',
       items: [
@@ -1547,6 +1614,18 @@
     const ctx = canvas.getContext('2d');
 
     let state = loadState();
+    const syncConfig = loadSyncConfig();
+    let cloudSyncTimer = null;
+    let cloudSyncInFlight = false;
+    const cloudRefs = {
+      token: document.getElementById('cloudToken'),
+      autoSync: document.getElementById('cloudAutoSync'),
+      saveNow: document.getElementById('cloudSaveNow'),
+      loadNow: document.getElementById('cloudLoadNow'),
+      remember: document.getElementById('cloudRemember'),
+      forget: document.getElementById('cloudForget'),
+      status: document.getElementById('cloudStatus')
+    };
     applySharedStateFromUrl();
     let selectedIndex = findSelectedIndex();
     let photoRoomFilter = state.activeRoom || 'living';
@@ -1632,6 +1711,31 @@
       }
     }
 
+    function loadSyncConfig() {
+      const empty = {
+        token: '',
+        autoSync: false,
+        lastSyncedAt: ''
+      };
+      try {
+        const raw = localStorage.getItem(SYNC_CONFIG_KEY);
+        if (!raw) return empty;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return empty;
+        return {
+          token: typeof parsed.token === 'string' ? parsed.token : '',
+          autoSync: Boolean(parsed.autoSync),
+          lastSyncedAt: typeof parsed.lastSyncedAt === 'string' ? parsed.lastSyncedAt : ''
+        };
+      } catch {
+        return empty;
+      }
+    }
+
+    function saveSyncConfig() {
+      localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(syncConfig));
+    }
+
     function encodeSharePayload(obj) {
       const json = JSON.stringify(obj);
       const utf8 = encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode('0x' + p1));
@@ -1660,8 +1764,12 @@
       saveState();
     }
 
-    function saveState() {
+    function saveState(options = {}) {
+      state.savedAt = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (!options.skipCloud && syncConfig.autoSync) {
+        scheduleCloudSync();
+      }
     }
 
     function findSelectedIndex() {
@@ -2459,6 +2567,241 @@
       return ok;
     }
 
+    function hydrateCloudSyncUI() {
+      if (!cloudRefs.status) return;
+      if (cloudRefs.token) cloudRefs.token.value = syncConfig.token || '';
+      if (cloudRefs.autoSync) cloudRefs.autoSync.checked = Boolean(syncConfig.autoSync);
+      if (syncConfig.lastSyncedAt) {
+        setCloudStatus(`Cloud: synced ${formatDateTime(syncConfig.lastSyncedAt)}`);
+        return;
+      }
+      setCloudStatus(syncConfig.token ? 'Cloud: token set' : 'Cloud: not configured');
+    }
+
+    function getStateSnapshot() {
+      const notes = document.getElementById('notes');
+      const shareBase = document.getElementById('shareBaseUrl');
+      if (notes) state.notes = notes.value;
+      if (shareBase) state.shareBaseUrl = shareBase.value.trim();
+      state.savedAt = new Date().toISOString();
+      return normalizeState(state);
+    }
+
+    function applyImportedState(payload, options = {}) {
+      state = normalizeState(payload || {});
+      selectedIndex = findSelectedIndex();
+      photoRoomFilter = state.activeRoom || 'living';
+      saveState({ skipCloud: Boolean(options.skipCloud) });
+      renderAll();
+    }
+
+    function rememberCloudToken() {
+      syncConfig.token = cloudRefs.token?.value.trim() || '';
+      if (!syncConfig.token) {
+        setCloudStatus('Cloud: token is empty', true);
+        return;
+      }
+      saveSyncConfig();
+      setCloudStatus('Cloud: token saved');
+      if (syncConfig.autoSync) scheduleCloudSync();
+    }
+
+    function forgetCloudToken() {
+      syncConfig.token = '';
+      syncConfig.autoSync = false;
+      syncConfig.lastSyncedAt = '';
+      if (cloudRefs.token) cloudRefs.token.value = '';
+      if (cloudRefs.autoSync) cloudRefs.autoSync.checked = false;
+      saveSyncConfig();
+      setCloudStatus('Cloud: token removed');
+    }
+
+    function scheduleCloudSync() {
+      if (!syncConfig.autoSync || !syncConfig.token) return;
+      clearTimeout(cloudSyncTimer);
+      cloudSyncTimer = setTimeout(() => {
+        syncToCloud('auto').catch((error) => {
+          setCloudStatus(`Cloud autosave failed: ${error.message}`, true);
+        });
+      }, 900);
+    }
+
+    async function syncCloudOnBoot() {
+      setCloudStatus('Cloud: checking latest...');
+      const remote = await fetchRemoteState(syncConfig.token);
+      if (!remote?.payload) {
+        await syncToCloud('bootstrap');
+        return;
+      }
+      const remoteStamp = Date.parse(remote.payload.savedAt || '');
+      const localStamp = Date.parse(state.savedAt || '');
+      if (Number.isFinite(remoteStamp) && (!Number.isFinite(localStamp) || remoteStamp > localStamp)) {
+        applyImportedState(remote.payload, { skipCloud: true });
+        setCloudStatus(`Cloud loaded latest: ${formatDateTime(remote.payload.savedAt)}`);
+        return;
+      }
+      await syncToCloud('bootstrap');
+    }
+
+    async function pullFromCloud() {
+      syncConfig.token = cloudRefs.token?.value.trim() || syncConfig.token || '';
+      if (!syncConfig.token) {
+        setCloudStatus('Cloud: set token first', true);
+        return;
+      }
+
+      setCloudStatus('Cloud: loading...');
+      try {
+        const remote = await fetchRemoteState(syncConfig.token);
+        if (!remote?.payload) {
+          setCloudStatus('Cloud: no saved data yet', true);
+          return;
+        }
+        applyImportedState(remote.payload, { skipCloud: true });
+        syncConfig.lastSyncedAt = remote.payload.savedAt || new Date().toISOString();
+        saveSyncConfig();
+        setCloudStatus(`Cloud load complete: ${formatDateTime(syncConfig.lastSyncedAt)}`);
+      } catch (error) {
+        setCloudStatus(`Cloud load failed: ${error.message}`, true);
+      }
+    }
+
+    async function syncToCloud(reason = 'manual') {
+      syncConfig.token = cloudRefs.token?.value.trim() || syncConfig.token || '';
+      if (!syncConfig.token) {
+        setCloudStatus('Cloud: set token first', true);
+        return;
+      }
+      if (cloudSyncInFlight) return;
+
+      cloudSyncInFlight = true;
+      setCloudStatus('Cloud: saving...');
+      try {
+        const snapshot = getStateSnapshot();
+        const remote = await fetchRemoteState(syncConfig.token);
+        await upsertRemoteState(syncConfig.token, snapshot, remote?.sha || null, reason);
+        syncConfig.lastSyncedAt = snapshot.savedAt || new Date().toISOString();
+        saveSyncConfig();
+        setCloudStatus(`Cloud save complete: ${formatDateTime(syncConfig.lastSyncedAt)}`);
+      } catch (error) {
+        setCloudStatus(`Cloud save failed: ${error.message}`, true);
+        throw error;
+      } finally {
+        cloudSyncInFlight = false;
+      }
+    }
+
+    function getGitHubHeaders(token) {
+      return {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+        'X-GitHub-Api-Version': GITHUB_API_VERSION
+      };
+    }
+
+    async function fetchRemoteState(token) {
+      const url = `${REMOTE_CONTENTS_URL}?ref=${encodeURIComponent(REMOTE_SYNC.branch)}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: getGitHubHeaders(token),
+        cache: 'no-store'
+      });
+      if (response.status === 404) return null;
+      if (!response.ok) {
+        const message = await parseGitHubError(response);
+        throw new Error(message);
+      }
+
+      const data = await response.json();
+      if (!data.content) return { sha: data.sha || null, payload: null };
+      const decoded = fromBase64Utf8(String(data.content).replace(/\n/g, ''));
+      return {
+        sha: data.sha || null,
+        payload: JSON.parse(decoded)
+      };
+    }
+
+    async function upsertRemoteState(token, payload, sha, reason) {
+      const commitMessage = reason === 'manual'
+        ? 'chore: save move portal state from web app'
+        : 'chore: autosave move portal state from web app';
+      const body = {
+        message: commitMessage,
+        content: toBase64Utf8(JSON.stringify(payload, null, 2)),
+        branch: REMOTE_SYNC.branch
+      };
+      if (sha) body.sha = sha;
+
+      const response = await fetch(REMOTE_CONTENTS_URL, {
+        method: 'PUT',
+        headers: getGitHubHeaders(token),
+        body: JSON.stringify(body)
+      });
+
+      if (response.status === 409) {
+        const latest = await fetchRemoteState(token);
+        const retryBody = { ...body, sha: latest?.sha || undefined };
+        const retry = await fetch(REMOTE_CONTENTS_URL, {
+          method: 'PUT',
+          headers: getGitHubHeaders(token),
+          body: JSON.stringify(retryBody)
+        });
+        if (!retry.ok) {
+          const message = await parseGitHubError(retry);
+          throw new Error(message);
+        }
+        return;
+      }
+
+      if (!response.ok) {
+        const message = await parseGitHubError(response);
+        throw new Error(message);
+      }
+    }
+
+    async function parseGitHubError(response) {
+      try {
+        const data = await response.json();
+        if (typeof data?.message === 'string' && data.message) return `${response.status}: ${data.message}`;
+      } catch {}
+      return `${response.status}: GitHub API error`;
+    }
+
+    function toBase64Utf8(text) {
+      const bytes = new TextEncoder().encode(text);
+      let binary = '';
+      bytes.forEach((byte) => {
+        binary += String.fromCharCode(byte);
+      });
+      return btoa(binary);
+    }
+
+    function fromBase64Utf8(base64Text) {
+      const binary = atob(base64Text);
+      const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+      return new TextDecoder().decode(bytes);
+    }
+
+    function setCloudStatus(text, isError = false) {
+      if (!cloudRefs.status) return;
+      cloudRefs.status.textContent = text;
+      cloudRefs.status.style.color = isError ? '#b42318' : '';
+    }
+
+    function formatDateTime(isoText) {
+      if (!isoText) return '-';
+      const d = new Date(isoText);
+      if (Number.isNaN(d.getTime())) return '-';
+      const y = d.getFullYear();
+      const m = `${d.getMonth() + 1}`.padStart(2, '0');
+      const day = `${d.getDate()}`.padStart(2, '0');
+      const hh = `${d.getHours()}`.padStart(2, '0');
+      const mm = `${d.getMinutes()}`.padStart(2, '0');
+      const ss = `${d.getSeconds()}`.padStart(2, '0');
+      return `${y}-${m}-${day} ${hh}:${mm}:${ss}`;
+    }
+
     function renderTop() {
       document.getElementById('moveDate').value = state.moveDate || '';
       document.getElementById('budget').value = Number(state.budget || 0);
@@ -2832,6 +3175,48 @@
         runGuideAction('share');
       });
 
+      if (cloudRefs.saveNow) {
+        cloudRefs.saveNow.addEventListener('click', () => {
+          syncToCloud('manual').catch(() => {});
+        });
+      }
+
+      if (cloudRefs.loadNow) {
+        cloudRefs.loadNow.addEventListener('click', pullFromCloud);
+      }
+
+      if (cloudRefs.remember) {
+        cloudRefs.remember.addEventListener('click', rememberCloudToken);
+      }
+
+      if (cloudRefs.forget) {
+        cloudRefs.forget.addEventListener('click', forgetCloudToken);
+      }
+
+      if (cloudRefs.autoSync) {
+        cloudRefs.autoSync.addEventListener('change', () => {
+          syncConfig.autoSync = cloudRefs.autoSync.checked;
+          syncConfig.token = cloudRefs.token?.value.trim() || syncConfig.token || '';
+          saveSyncConfig();
+          if (syncConfig.autoSync) {
+            setCloudStatus('Cloud autosave: ON');
+            scheduleCloudSync();
+          } else {
+            clearTimeout(cloudSyncTimer);
+            setCloudStatus('Cloud autosave: OFF');
+          }
+        });
+      }
+
+      if (cloudRefs.token) {
+        cloudRefs.token.addEventListener('input', () => {
+          syncConfig.token = cloudRefs.token.value.trim();
+          if (syncConfig.autoSync && syncConfig.token) {
+            scheduleCloudSync();
+          }
+        });
+      }
+
       document.getElementById('guideActions').addEventListener('click', (e) => {
         const btn = e.target.closest('button[data-guide-action]');
         if (!btn) return;
@@ -3055,7 +3440,13 @@
     bindLiveScene();
     bindVideoScene();
     bindUI();
+    hydrateCloudSyncUI();
     renderAll();
+    if (syncConfig.autoSync && syncConfig.token) {
+      syncCloudOnBoot().catch((error) => {
+        setCloudStatus(`Cloud boot sync failed: ${error.message}`, true);
+      });
+    }
   </script>
 </body>
 </html>
