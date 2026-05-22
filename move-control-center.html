@@ -1285,6 +1285,256 @@
       gap: 6px;
     }
 
+    .strategy-layout {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .strategy-map {
+      position: relative;
+      min-height: 420px;
+      border: 1px solid #d8d2c8;
+      border-radius: 10px;
+      background: #f8f5ee;
+      overflow: hidden;
+    }
+
+    .strategy-lines {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .strategy-line {
+      stroke: #c2b8a9;
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 4 6;
+    }
+
+    .strategy-node-layer {
+      position: absolute;
+      inset: 0;
+    }
+
+    .strategy-node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      min-width: 140px;
+      max-width: 220px;
+      border: 1px solid #cfc6b8;
+      border-radius: 10px;
+      background: #fffdf8;
+      padding: 8px 10px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform .16s ease, border-color .16s ease, background-color .16s ease;
+      animation: nodeIn .35s ease both;
+    }
+
+    .strategy-node:hover {
+      transform: translate(-50%, calc(-50% - 2px));
+      border-color: #a99d8d;
+    }
+
+    .strategy-node.active {
+      border-color: #6e6253;
+      background: #f3ece0;
+    }
+
+    .strategy-node.done {
+      border-color: #8fa08f;
+      background: #f2f7f1;
+    }
+
+    .strategy-node-title {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: #312d28;
+    }
+
+    .strategy-node-sub {
+      margin-top: 3px;
+      font-size: 11px;
+      line-height: 1.35;
+      color: #6a6258;
+    }
+
+    .strategy-side {
+      display: grid;
+      gap: 10px;
+    }
+
+    .strategy-current,
+    .strategy-progress-box,
+    .strategy-reco,
+    .choice-box {
+      border: 1px solid #d8d2c8;
+      border-radius: 10px;
+      background: #fffdf8;
+      padding: 9px;
+    }
+
+    .strategy-current h3 {
+      margin: 4px 0 6px;
+      font-size: 17px;
+      line-height: 1.3;
+      color: #2e2923;
+    }
+
+    .strategy-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .choice-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .choice-row {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .choice-btn {
+      border: 1px solid #cbc2b3;
+      border-radius: 8px;
+      background: #f8f5ee;
+      color: #463f36;
+      padding: 6px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .16s ease;
+    }
+
+    .choice-btn.active {
+      border-color: #6d6152;
+      background: #eae2d4;
+      color: #2f2a24;
+    }
+
+    .strategy-reco ul {
+      margin: 7px 0 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 5px;
+      color: #4b443a;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .strategy-jump {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .money-summary {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .money-pill {
+      border: 1px solid #d8d2c8;
+      border-radius: 10px;
+      background: #fffdf8;
+      padding: 10px;
+      animation: cardIn .26s ease both;
+    }
+
+    .money-pill .k {
+      font-size: 11px;
+      color: #685f55;
+      margin-bottom: 4px;
+    }
+
+    .money-pill .v {
+      font-size: 20px;
+      font-weight: 700;
+      color: #2f2a24;
+      line-height: 1.2;
+    }
+
+    .money-pill .sub {
+      margin-top: 5px;
+      font-size: 11px;
+      color: #756b61;
+    }
+
+    .money-filters {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+
+    .money-bars {
+      margin-top: 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .budget-bar {
+      border: 1px solid #d8d2c8;
+      background: #fffdf8;
+      border-radius: 8px;
+      padding: 7px 8px;
+    }
+
+    .budget-bar-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      color: #5e564c;
+      margin-bottom: 4px;
+    }
+
+    .budget-track {
+      height: 8px;
+      border-radius: 999px;
+      background: #ece4d8;
+      overflow: hidden;
+    }
+
+    .budget-fill {
+      height: 100%;
+      background: #7b6e5d;
+      width: 0%;
+      transition: width .24s ease;
+    }
+
+    .mini-title {
+      margin: 14px 0 7px;
+      font-size: 12px;
+      letter-spacing: 0;
+      color: #574f46;
+    }
+
+    @keyframes nodeIn {
+      from { opacity: 0; transform: translate(-50%, calc(-50% + 8px)); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     @media (max-width: 1180px) {
       .top { grid-template-columns: 1fr; }
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1293,6 +1543,9 @@
       .guide-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .plan-layout { grid-template-columns: 1fr; }
       .cloud-grid { grid-template-columns: 1fr; }
+      .strategy-layout { grid-template-columns: 1fr; }
+      .money-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .money-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       #planCanvas { min-height: 680px; height: 76vh; max-height: 960px; }
     }
 
@@ -1304,6 +1557,9 @@
       .guide-actions { grid-template-columns: 1fr; }
       .photo-grid { grid-template-columns: 1fr 1fr; }
       .video-grid { grid-template-columns: 1fr 1fr; }
+      .strategy-actions { grid-template-columns: 1fr; }
+      .money-summary { grid-template-columns: 1fr; }
+      .money-filters { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -1359,14 +1615,89 @@
     </section>
 
     <section class="tabs" id="tabs">
-      <button class="tab active" data-tab="plan">レイアウト</button>
+      <button class="tab active" data-tab="strategy">戦略</button>
+      <button class="tab" data-tab="plan">レイアウト</button>
       <button class="tab" data-tab="money">費用</button>
       <button class="tab" data-tab="dispose">処分</button>
       <button class="tab" data-tab="schedule">日程</button>
       <button class="tab" data-tab="notes">共有</button>
     </section>
 
-    <section id="sec-plan" class="section active">
+    <section id="sec-strategy" class="section active">
+      <div class="panel block">
+        <h2>プロジェクト戦略マップ</h2>
+        <p class="muted">段階を選んで進める形式です。現在位置を決めると、買う物・予算・次アクションを自動で提案します。</p>
+
+        <div class="strategy-layout">
+          <div class="strategy-map" id="strategyMap">
+            <svg class="strategy-lines" id="strategyLines" viewBox="0 0 960 420" preserveAspectRatio="none" aria-hidden="true"></svg>
+            <div class="strategy-node-layer" id="strategyNodes"></div>
+          </div>
+
+          <aside class="strategy-side">
+            <div class="strategy-current">
+              <div class="mini">現在の段階</div>
+              <h3 id="strategyNodeTitle">-</h3>
+              <p id="strategyNodeBody" class="muted">-</p>
+              <div class="mini" id="strategyNodeMeta">-</div>
+            </div>
+
+            <div class="strategy-actions">
+              <button class="btn" id="strategyPrev">前の段階</button>
+              <button class="btn primary" id="strategyToggleDone">この段階を完了</button>
+              <button class="btn" id="strategyNext">次の段階</button>
+            </div>
+
+            <div class="strategy-progress-box">
+              <div class="mini" id="strategyProgressText">0/0 完了</div>
+              <div class="guide-bar"><span id="strategyProgressBar2"></span></div>
+            </div>
+
+            <div class="choice-grid">
+              <div class="choice-box" data-choice-group="budget">
+                <div class="mini">予算方針</div>
+                <div class="choice-row">
+                  <button class="choice-btn" data-choice-group="budget" data-choice-value="tight">節約重視</button>
+                  <button class="choice-btn" data-choice-group="budget" data-choice-value="balanced">バランス</button>
+                  <button class="choice-btn" data-choice-group="budget" data-choice-value="comfort">快適重視</button>
+                </div>
+              </div>
+
+              <div class="choice-box" data-choice-group="move">
+                <div class="mini">引っ越し方針</div>
+                <div class="choice-row">
+                  <button class="choice-btn" data-choice-group="move" data-choice-value="pro">業者中心</button>
+                  <button class="choice-btn" data-choice-group="move" data-choice-value="hybrid">混合</button>
+                  <button class="choice-btn" data-choice-group="move" data-choice-value="self">自力多め</button>
+                </div>
+              </div>
+
+              <div class="choice-box" data-choice-group="support">
+                <div class="mini">進め方</div>
+                <div class="choice-row">
+                  <button class="choice-btn" data-choice-group="support" data-choice-value="solo">一人で進行</button>
+                  <button class="choice-btn" data-choice-group="support" data-choice-value="pair">二人で共有</button>
+                  <button class="choice-btn" data-choice-group="support" data-choice-value="review">レビュー重視</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="strategy-reco">
+              <div class="mini">この段階で優先すること</div>
+              <ul id="strategyRecommend"></ul>
+            </div>
+
+            <div class="strategy-jump">
+              <button class="btn" data-strategy-jump="money">買い物と費用へ</button>
+              <button class="btn" data-strategy-jump="schedule">日程へ</button>
+              <button class="btn" data-strategy-jump="notes">共有へ</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-plan" class="section">
       <div class="panel block">
         <h2>配置</h2>
 
@@ -1522,12 +1853,51 @@
 
     <section id="sec-money" class="section">
       <div class="panel block">
-        <h2>費用</h2>
+        <h2>買い物とお金管理</h2>
+        <p class="muted">「買うもの」と「費用」を同時に管理します。状態を切り替えると、予算差額と不足項目がすぐ見える構成です。</p>
+
+        <div class="money-summary" id="moneySummaryCards"></div>
+
+        <div class="money-filters">
+          <div>
+            <label for="moneyStatusFilter">状態フィルタ</label>
+            <select id="moneyStatusFilter">
+              <option value="all">すべて</option>
+              <option value="確定">確定</option>
+              <option value="検討中">検討中</option>
+              <option value="未定">未定</option>
+              <option value="保留">保留</option>
+            </select>
+          </div>
+          <div>
+            <label for="moneyCategoryFilter">分類フィルタ</label>
+            <select id="moneyCategoryFilter">
+              <option value="all">すべて</option>
+            </select>
+          </div>
+          <div>
+            <label for="moneySearch">検索</label>
+            <input id="moneySearch" type="text" placeholder="家具名・メモで検索" />
+          </div>
+          <div>
+            <label for="shoppingPriorityFilter">購入優先度</label>
+            <select id="shoppingPriorityFilter">
+              <option value="all">すべて</option>
+              <option value="高">高</option>
+              <option value="中">中</option>
+              <option value="低">低</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="money-bars" id="budgetBars"></div>
+
+        <h3 class="mini-title">費用台帳</h3>
         <div style="overflow:auto;">
           <table class="tbl" id="moneyTable">
             <thead>
               <tr>
-                <th>家具</th>
+                <th>項目</th>
                 <th>分類</th>
                 <th>金額（円）</th>
                 <th>状態</th>
@@ -1540,6 +1910,64 @@
         </div>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn" id="addMoney">項目追加</button>
+        </div>
+
+        <h3 class="mini-title" style="margin-top:16px;">買うものリスト</h3>
+        <div class="row3">
+          <div>
+            <label for="shopName">品目名</label>
+            <input id="shopName" type="text" placeholder="例: 洗濯機" />
+          </div>
+          <div>
+            <label for="shopCategory">分類</label>
+            <input id="shopCategory" type="text" placeholder="例: 家電" />
+          </div>
+          <div>
+            <label for="shopPlan">予定額（円）</label>
+            <input id="shopPlan" type="number" min="0" step="100" />
+          </div>
+        </div>
+
+        <div class="row3" style="margin-top:8px;">
+          <div>
+            <label for="shopPriority">優先度</label>
+            <select id="shopPriority">
+              <option value="高">高</option>
+              <option value="中">中</option>
+              <option value="低">低</option>
+            </select>
+          </div>
+          <div>
+            <label for="shopDue">購入期限</label>
+            <input id="shopDue" type="date" />
+          </div>
+          <div>
+            <label for="shopVendor">購入先</label>
+            <input id="shopVendor" type="text" placeholder="例: IKEA / Amazon" />
+          </div>
+        </div>
+
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn primary" id="addShopping">買い物を追加</button>
+        </div>
+
+        <div style="overflow:auto;margin-top:8px;">
+          <table class="tbl" id="shoppingTable">
+            <thead>
+              <tr>
+                <th>品目</th>
+                <th>分類</th>
+                <th>優先</th>
+                <th>予定額</th>
+                <th>実額</th>
+                <th>状態</th>
+                <th>期限</th>
+                <th>購入先</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -1669,7 +2097,7 @@
       notes: '',
       shareBaseUrl: '',
       savedAt: '',
-      active部屋: 'living',
+      activeRoom: 'living',
       selectedItemId: 'tv',
       items: [
         { id: 'tv', name: 'LOWYA TVスタンド', zone: 'living', x: 12, z: 220, w: 120, d: 33, color: '#f59e0b' },
@@ -1699,8 +2127,25 @@
       ],
       tasksDone: {},
       tasksExtra: [],
+      strategy: {
+        current: 'kickoff',
+        done: {},
+        choices: {
+          budget: 'balanced',
+          move: 'pro',
+          support: 'pair'
+        }
+      },
+      shopping: [
+        { id: 's001', name: '冷蔵庫', category: '家電', priority: '高', plan: 90000, actual: 0, status: '検討中', due: '', vendor: '' },
+        { id: 's002', name: '洗濯機', category: '家電', priority: '高', plan: 70000, actual: 0, status: '検討中', due: '', vendor: '' },
+        { id: 's003', name: 'カーテン一式', category: '新居準備', priority: '高', plan: 24000, actual: 0, status: '未定', due: '', vendor: '' },
+        { id: 's004', name: '照明', category: '新居準備', priority: '中', plan: 18000, actual: 0, status: '未定', due: '', vendor: '' },
+        { id: 's005', name: '猫用品追加（柵/マット）', category: '猫', priority: '高', plan: 22000, actual: 0, status: '検討中', due: '', vendor: '' },
+        { id: 's006', name: '電子レンジ', category: '家電', priority: '中', plan: 28000, actual: 0, status: '未定', due: '', vendor: '' }
+      ],
       photoScene: {
-        imageBy部屋: {
+        imageByRoom: {
           living: './assets/photos/living/living-real-room-reference.jpeg',
           bedroom: './assets/photos/bedroom/bedroom-main.jpeg',
           roof: './assets/photos/balcony/balcony-view-1.jpeg'
@@ -1712,7 +2157,7 @@
         }
       },
       videoScene: {
-        selectedBy部屋: {
+        selectedByRoom: {
           living: '',
           bedroom: '',
           roof: ''
@@ -1870,6 +2315,64 @@
 
     const baseVideos = [];
 
+    const strategyFlow = [
+      {
+        id: 'kickoff',
+        label: '契約確定',
+        sub: '6/12を軸に全体を固定',
+        x: 13, y: 18,
+        next: ['budget', 'schedule'],
+        recos: ['引っ越し日・鍵受け渡し時刻を固定', '旧居解約期限を逆算して日程へ反映', '初日必要品を「高優先」で登録']
+      },
+      {
+        id: 'budget',
+        label: '予算設計',
+        sub: '買い物と支払い枠を決める',
+        x: 38, y: 18,
+        next: ['shopping'],
+        recos: ['総予算から固定費を先に確保', '家電・猫用品・処分費で上限を分割', '未定項目は仮価格で先に入力']
+      },
+      {
+        id: 'schedule',
+        label: '日程設計',
+        sub: '期限超過を潰す',
+        x: 38, y: 45,
+        next: ['shopping'],
+        recos: ['期限が近いタスクから完了', '業者と粗大ごみの予約を先に確定', '住所変更をまとめて処理']
+      },
+      {
+        id: 'shopping',
+        label: '購入判断',
+        sub: '優先度で買う順を決定',
+        x: 63, y: 31,
+        next: ['move'],
+        recos: ['高優先のみ先に確定して発注', '未定項目は代替案を2つずつ持つ', '購入期限の近い順に並べ替える']
+      },
+      {
+        id: 'move',
+        label: '搬入・配置',
+        sub: '当日の詰まりを防ぐ',
+        x: 84, y: 31,
+        next: ['share'],
+        recos: ['搬入順を大物→小物で固定', '玄関〜設置場所まで動線を空ける', '配置後に不足品だけ追加購入']
+      },
+      {
+        id: 'share',
+        label: '共有・改善',
+        sub: '彼女と確認して修正',
+        x: 84, y: 62,
+        next: [],
+        recos: ['共有リンクを作って同時確認', '修正点はメモと費用に即反映', 'クラウド保存で端末変更に備える']
+      }
+    ];
+    const strategyById = new Map(strategyFlow.map((n) => [n.id, n]));
+    const moneyUI = {
+      status: 'all',
+      category: 'all',
+      search: '',
+      priority: 'all'
+    };
+
     const canvas = document.getElementById('planCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -1915,7 +2418,7 @@
       const srcImageByRoom = srcScene.imageByRoom || {};
       const srcNudges = srcScene.nudges || {};
       const photoScene = {
-        imageBy部屋: {
+        imageByRoom: {
           living: srcImageByRoom.living || defaultState.photoScene.imageByRoom.living,
           bedroom: srcImageByRoom.bedroom || defaultState.photoScene.imageByRoom.bedroom,
           roof: srcImageByRoom.roof || defaultState.photoScene.imageByRoom.roof
@@ -1931,7 +2434,7 @@
       const srcVideoByRoom = srcVideoScene.selectedByRoom || {};
       const srcVideoCustom = Array.isArray(srcVideoScene.custom) ? srcVideoScene.custom : [];
       const videoScene = {
-        selectedBy部屋: {
+        selectedByRoom: {
           living: typeof srcVideoByRoom.living === 'string' ? srcVideoByRoom.living : '',
           bedroom: typeof srcVideoByRoom.bedroom === 'string' ? srcVideoByRoom.bedroom : '',
           roof: typeof srcVideoByRoom.roof === 'string' ? srcVideoByRoom.roof : ''
@@ -1946,6 +2449,32 @@
           }))
       };
 
+      const srcStrategy = data.strategy || {};
+      const strategy = {
+        current: typeof srcStrategy.current === 'string' ? srcStrategy.current : defaultState.strategy.current,
+        done: srcStrategy.done && typeof srcStrategy.done === 'object' ? { ...srcStrategy.done } : {},
+        choices: {
+          budget: ['tight', 'balanced', 'comfort'].includes(srcStrategy.choices?.budget) ? srcStrategy.choices.budget : defaultState.strategy.choices.budget,
+          move: ['pro', 'hybrid', 'self'].includes(srcStrategy.choices?.move) ? srcStrategy.choices.move : defaultState.strategy.choices.move,
+          support: ['solo', 'pair', 'review'].includes(srcStrategy.choices?.support) ? srcStrategy.choices.support : defaultState.strategy.choices.support
+        }
+      };
+
+      const srcShopping = Array.isArray(data.shopping) ? data.shopping : clone(defaultState.shopping);
+      const shopping = srcShopping
+        .map((it, i) => ({
+          id: typeof it.id === 'string' && it.id ? it.id : `s-${i}`,
+          name: String(it.name || '').trim(),
+          category: String(it.category || '').trim(),
+          priority: ['高', '中', '低'].includes(it.priority) ? it.priority : '中',
+          plan: Number(it.plan || 0),
+          actual: Number(it.actual || 0),
+          status: ['未定', '検討中', '確定', '購入済'].includes(it.status) ? it.status : '未定',
+          due: typeof it.due === 'string' ? it.due : '',
+          vendor: typeof it.vendor === 'string' ? it.vendor : ''
+        }))
+        .filter((it) => it.name);
+
       return {
         ...clone(defaultState),
         ...data,
@@ -1955,6 +2484,8 @@
         dispose: data.dispose || clone(defaultState.dispose),
         tasksDone: data.tasksDone || {},
         tasksExtra: data.tasksExtra || [],
+        strategy,
+        shopping,
         photoScene,
         videoScene
       };
@@ -2611,22 +3142,240 @@
       `;
     }
 
-    function renderMoney() {
-      const tbody = document.querySelector('#moneyTable tbody');
-      tbody.innerHTML = state.money.map((m, i) => `
-        <tr data-i="${i}">
-          <td><input type="text" data-k="name" value="${escapeHtml(m.name)}"></td>
-          <td><input type="text" data-k="category" value="${escapeHtml(m.category)}"></td>
-          <td><input type="number" data-k="amount" min="0" step="100" value="${Number(m.amount||0)}"></td>
-          <td>
-            <select data-k="status">
-              ${['確定','検討中','未定','保留'].map(s=>`<option ${m.status===s?'selected':''}>${s}</option>`).join('')}
-            </select>
-          </td>
-          <td><input type="text" data-k="note" value="${escapeHtml(m.note||'')}"></td>
-          <td><button class="btn" data-act="del">削除</button></td>
-        </tr>
+    function ensureStrategyState() {
+      if (!state.strategy || typeof state.strategy !== 'object') state.strategy = clone(defaultState.strategy);
+      if (!state.strategy.done || typeof state.strategy.done !== 'object') state.strategy.done = {};
+      if (!state.strategy.choices || typeof state.strategy.choices !== 'object') {
+        state.strategy.choices = clone(defaultState.strategy.choices);
+      }
+      if (!['tight', 'balanced', 'comfort'].includes(state.strategy.choices.budget)) state.strategy.choices.budget = 'balanced';
+      if (!['pro', 'hybrid', 'self'].includes(state.strategy.choices.move)) state.strategy.choices.move = 'pro';
+      if (!['solo', 'pair', 'review'].includes(state.strategy.choices.support)) state.strategy.choices.support = 'pair';
+      if (!strategyById.has(state.strategy.current)) state.strategy.current = strategyFlow[0].id;
+    }
+
+    function ensureShoppingState() {
+      if (!Array.isArray(state.shopping)) state.shopping = clone(defaultState.shopping);
+      state.shopping = state.shopping.map((it, i) => ({
+        id: typeof it.id === 'string' && it.id ? it.id : `s-${i}`,
+        name: String(it.name || '').trim(),
+        category: String(it.category || '').trim(),
+        priority: ['高', '中', '低'].includes(it.priority) ? it.priority : '中',
+        plan: Number(it.plan || 0),
+        actual: Number(it.actual || 0),
+        status: ['未定', '検討中', '確定', '購入済'].includes(it.status) ? it.status : '未定',
+        due: typeof it.due === 'string' ? it.due : '',
+        vendor: typeof it.vendor === 'string' ? it.vendor : ''
+      })).filter((it) => it.name);
+    }
+
+    function getStrategyPrevId(id) {
+      const hit = strategyFlow.find((n) => n.next.includes(id));
+      return hit ? hit.id : null;
+    }
+
+    function getStrategyNextId(id) {
+      const current = strategyById.get(id);
+      if (!current || !current.next.length) return null;
+      const firstUndone = current.next.find((nid) => !state.strategy.done[nid]);
+      return firstUndone || current.next[0];
+    }
+
+    function renderStrategy() {
+      ensureStrategyState();
+      const lines = document.getElementById('strategyLines');
+      const nodesBox = document.getElementById('strategyNodes');
+      const title = document.getElementById('strategyNodeTitle');
+      const body = document.getElementById('strategyNodeBody');
+      const meta = document.getElementById('strategyNodeMeta');
+      const rec = document.getElementById('strategyRecommend');
+      const pg = document.getElementById('strategyProgressText');
+      const pgBar = document.getElementById('strategyProgressBar2');
+      if (!lines || !nodesBox || !title || !body || !meta || !rec || !pg || !pgBar) return;
+
+      const px = (x) => (x / 100) * 960;
+      const py = (y) => (y / 100) * 420;
+
+      lines.innerHTML = strategyFlow.flatMap((n) => n.next.map((nextId) => {
+        const t = strategyById.get(nextId);
+        if (!t) return '';
+        return `<path class="strategy-line" d="M ${px(n.x)} ${py(n.y)} L ${px(t.x)} ${py(t.y)}"></path>`;
+      })).join('');
+
+      nodesBox.innerHTML = strategyFlow.map((n) => `
+        <button type="button"
+          class="strategy-node ${state.strategy.current === n.id ? 'active' : ''} ${state.strategy.done[n.id] ? 'done' : ''}"
+          data-strategy-node="${n.id}"
+          style="left:${n.x}%;top:${n.y}%;">
+          <div class="strategy-node-title">${escapeHtml(n.label)}</div>
+          <div class="strategy-node-sub">${escapeHtml(n.sub)}</div>
+        </button>
       `).join('');
+
+      const current = strategyById.get(state.strategy.current) || strategyFlow[0];
+      const prevId = getStrategyPrevId(current.id);
+      const nextId = getStrategyNextId(current.id);
+      const doneCount = strategyFlow.filter((n) => state.strategy.done[n.id]).length;
+      const percent = Math.round((doneCount / strategyFlow.length) * 100);
+
+      title.textContent = current.label;
+      body.textContent = current.sub;
+      meta.textContent = `前: ${prevId ? strategyById.get(prevId)?.label || '-' : '-'} / 次: ${nextId ? strategyById.get(nextId)?.label || '-' : '-'}`;
+      rec.innerHTML = current.recos.map((t) => `<li>${escapeHtml(t)}</li>`).join('');
+      pg.textContent = `${doneCount}/${strategyFlow.length} 完了（${percent}%）`;
+      pgBar.style.width = `${percent}%`;
+
+      const prevBtn = document.getElementById('strategyPrev');
+      const nextBtn = document.getElementById('strategyNext');
+      const doneBtn = document.getElementById('strategyToggleDone');
+      if (prevBtn) prevBtn.disabled = !prevId;
+      if (nextBtn) nextBtn.disabled = !nextId;
+      if (doneBtn) doneBtn.textContent = state.strategy.done[current.id] ? '完了を取り消す' : 'この段階を完了';
+
+      document.querySelectorAll('.choice-btn').forEach((btn) => {
+        const g = btn.dataset.choiceGroup;
+        const v = btn.dataset.choiceValue;
+        btn.classList.toggle('active', state.strategy.choices[g] === v);
+      });
+    }
+
+    function getMoneyRowsFiltered() {
+      return state.money.filter((m) => {
+        if (moneyUI.status !== 'all' && m.status !== moneyUI.status) return false;
+        if (moneyUI.category !== 'all' && m.category !== moneyUI.category) return false;
+        if (moneyUI.search) {
+          const q = moneyUI.search.toLowerCase();
+          const text = `${m.name || ''} ${m.category || ''} ${m.note || ''}`.toLowerCase();
+          if (!text.includes(q)) return false;
+        }
+        return true;
+      });
+    }
+
+    function getShoppingRowsFiltered() {
+      ensureShoppingState();
+      return state.shopping.filter((s) => {
+        if (moneyUI.category !== 'all' && s.category !== moneyUI.category) return false;
+        if (moneyUI.priority !== 'all' && s.priority !== moneyUI.priority) return false;
+        if (moneyUI.search) {
+          const q = moneyUI.search.toLowerCase();
+          const text = `${s.name || ''} ${s.category || ''} ${s.vendor || ''}`.toLowerCase();
+          if (!text.includes(q)) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderMoneySummary() {
+      ensureShoppingState();
+      const fixed = state.money.filter((m) => m.status === '確定').reduce((sum, m) => sum + Number(m.amount || 0), 0);
+      const moneyUndecided = state.money.filter((m) => m.status !== '確定').length;
+      const shoppingPlan = state.shopping.reduce((sum, s) => sum + Number(s.plan || 0), 0);
+      const shoppingActual = state.shopping.reduce((sum, s) => sum + Number(s.actual || 0), 0);
+      const shoppingDone = state.shopping.filter((s) => s.status === '購入済').length;
+      const highOpen = state.shopping.filter((s) => s.priority === '高' && s.status !== '購入済').length;
+      const used = fixed + shoppingActual;
+      const remain = Number(state.budget || 0) - used;
+
+      const target = document.getElementById('moneySummaryCards');
+      if (target) {
+        target.innerHTML = `
+          <article class="money-pill"><div class="k">総予算</div><div class="v">${formatYen(state.budget || 0)}円</div><div class="sub">設定値</div></article>
+          <article class="money-pill"><div class="k">使用額</div><div class="v">${formatYen(used)}円</div><div class="sub">確定費用 + 購入実額</div></article>
+          <article class="money-pill"><div class="k">残予算</div><div class="v" style="color:${remain >= 0 ? '#365d3b' : '#7a3f36'}">${formatYen(remain)}円</div><div class="sub">${remain >= 0 ? '予算内' : '超過'}</div></article>
+          <article class="money-pill"><div class="k">購入進捗</div><div class="v">${shoppingDone}/${state.shopping.length}</div><div class="sub">高優先 未完了 ${highOpen} 件</div></article>
+        `;
+      }
+
+      const bars = document.getElementById('budgetBars');
+      if (bars) {
+        const spendPct = state.budget ? Math.min(140, Math.round((used / state.budget) * 100)) : 0;
+        const planPct = state.budget ? Math.min(140, Math.round((shoppingPlan / state.budget) * 100)) : 0;
+        const undecidedPct = state.money.length ? Math.round((moneyUndecided / state.money.length) * 100) : 0;
+        bars.innerHTML = `
+          <div class="budget-bar">
+            <div class="budget-bar-head"><span>予算消化</span><span>${spendPct}%</span></div>
+            <div class="budget-track"><div class="budget-fill" style="width:${Math.min(100, spendPct)}%"></div></div>
+          </div>
+          <div class="budget-bar">
+            <div class="budget-bar-head"><span>購入予定総額（買い物リスト）</span><span>${planPct}%</span></div>
+            <div class="budget-track"><div class="budget-fill" style="width:${Math.min(100, planPct)}%"></div></div>
+          </div>
+          <div class="budget-bar">
+            <div class="budget-bar-head"><span>費用台帳の未確定率</span><span>${undecidedPct}%</span></div>
+            <div class="budget-track"><div class="budget-fill" style="width:${Math.min(100, undecidedPct)}%"></div></div>
+          </div>
+        `;
+      }
+    }
+
+    function renderMoneyFilters() {
+      const categorySelect = document.getElementById('moneyCategoryFilter');
+      if (!categorySelect) return;
+      const categories = Array.from(new Set([
+        ...state.money.map((m) => m.category),
+        ...state.shopping.map((s) => s.category)
+      ].filter(Boolean)));
+      const current = moneyUI.category;
+      categorySelect.innerHTML = `<option value="all">すべて</option>${categories.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}`;
+      categorySelect.value = categories.includes(current) ? current : 'all';
+      moneyUI.category = categorySelect.value;
+    }
+
+    function renderMoney() {
+      renderMoneyFilters();
+      renderMoneySummary();
+      const rows = getMoneyRowsFiltered();
+      const tbody = document.querySelector('#moneyTable tbody');
+      if (!tbody) return;
+      tbody.innerHTML = rows.map((m) => {
+        const idx = state.money.indexOf(m);
+        return `
+          <tr data-i="${idx}">
+            <td><input type="text" data-k="name" value="${escapeHtml(m.name)}"></td>
+            <td><input type="text" data-k="category" value="${escapeHtml(m.category)}"></td>
+            <td><input type="number" data-k="amount" min="0" step="100" value="${Number(m.amount||0)}"></td>
+            <td>
+              <select data-k="status">
+                ${['確定','検討中','未定','保留'].map(s=>`<option ${m.status===s?'selected':''}>${s}</option>`).join('')}
+              </select>
+            </td>
+            <td><input type="text" data-k="note" value="${escapeHtml(m.note||'')}"></td>
+            <td><button class="btn" data-act="del">削除</button></td>
+          </tr>
+        `;
+      }).join('');
+      renderShopping();
+    }
+
+    function renderShopping() {
+      const rows = getShoppingRowsFiltered();
+      const tbody = document.querySelector('#shoppingTable tbody');
+      if (!tbody) return;
+      tbody.innerHTML = rows.map((s) => {
+        const idx = state.shopping.findIndex((x) => x.id === s.id);
+        return `
+          <tr data-i="${idx}">
+            <td><input type="text" data-k="name" value="${escapeHtml(s.name)}"></td>
+            <td><input type="text" data-k="category" value="${escapeHtml(s.category)}"></td>
+            <td>
+              <select data-k="priority">
+                ${['高','中','低'].map(p => `<option ${s.priority===p?'selected':''}>${p}</option>`).join('')}
+              </select>
+            </td>
+            <td><input type="number" data-k="plan" min="0" step="100" value="${Number(s.plan||0)}"></td>
+            <td><input type="number" data-k="actual" min="0" step="100" value="${Number(s.actual||0)}"></td>
+            <td>
+              <select data-k="status">
+                ${['未定','検討中','確定','購入済'].map(st => `<option ${s.status===st?'selected':''}>${st}</option>`).join('')}
+              </select>
+            </td>
+            <td><input type="date" data-k="due" value="${s.due || ''}"></td>
+            <td><input type="text" data-k="vendor" value="${escapeHtml(s.vendor || '')}"></td>
+            <td><button class="btn" data-act="del">削除</button></td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function renderDispose() {
@@ -3087,6 +3836,7 @@
       drawPlan();
       updateInspector();
       renderItemTable();
+      renderStrategy();
       renderMoney();
       renderDispose();
       renderTimeline();
@@ -3483,6 +4233,70 @@
         runGuideAction(btn.dataset.guideAction);
       });
 
+      document.getElementById('strategyNodes').addEventListener('click', (e) => {
+        const node = e.target.closest('button[data-strategy-node]');
+        if (!node) return;
+        ensureStrategyState();
+        state.strategy.current = node.dataset.strategyNode;
+        saveState();
+        renderStrategy();
+      });
+
+      document.getElementById('strategyPrev').addEventListener('click', () => {
+        ensureStrategyState();
+        const prevId = getStrategyPrevId(state.strategy.current);
+        if (!prevId) return;
+        state.strategy.current = prevId;
+        saveState();
+        renderStrategy();
+      });
+
+      document.getElementById('strategyNext').addEventListener('click', () => {
+        ensureStrategyState();
+        const nextId = getStrategyNextId(state.strategy.current);
+        if (!nextId) return;
+        state.strategy.current = nextId;
+        saveState();
+        renderStrategy();
+      });
+
+      document.getElementById('strategyToggleDone').addEventListener('click', () => {
+        ensureStrategyState();
+        const current = strategyById.get(state.strategy.current) || strategyFlow[0];
+        if (state.strategy.done[current.id]) {
+          delete state.strategy.done[current.id];
+        } else {
+          state.strategy.done[current.id] = true;
+          const nextId = getStrategyNextId(current.id);
+          if (nextId) state.strategy.current = nextId;
+        }
+        saveState();
+        renderStrategy();
+        renderGuide();
+      });
+
+      document.querySelector('.choice-grid').addEventListener('click', (e) => {
+        const btn = e.target.closest('button.choice-btn[data-choice-group][data-choice-value]');
+        if (!btn) return;
+        const group = btn.dataset.choiceGroup;
+        const value = btn.dataset.choiceValue;
+        if (!group || !value) return;
+        ensureStrategyState();
+        state.strategy.choices[group] = value;
+        saveState();
+        renderStrategy();
+      });
+
+      document.querySelector('.strategy-jump').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-strategy-jump]');
+        if (!btn) return;
+        const tab = btn.dataset.strategyJump;
+        if (!tab) return;
+        switchTab(tab);
+        const focusId = tab === 'money' ? 'moneySummaryCards' : tab === 'schedule' ? 'timeline' : 'shareLink';
+        setTimeout(() => flashGuideTarget(focusId), 80);
+      });
+
       document.getElementById('roomScope').addEventListener('click', (e) => {
         const btn = e.target.closest('button[data-room-scope]');
         if (!btn) return;
@@ -3541,9 +4355,13 @@
         const i = Number(tr.dataset.i);
         const k = e.target.dataset.k;
         if (!k) return;
+        if (!state.money[i]) return;
         state.money[i][k] = k === 'amount' ? Number(e.target.value || 0) : e.target.value;
         saveState();
+        if (k === 'category') renderMoneyFilters();
+        renderMoneySummary();
         renderCards();
+        renderGuide();
       });
 
       document.querySelector('#moneyTable tbody').addEventListener('click', (e) => {
@@ -3554,6 +4372,110 @@
         saveState();
         renderAll();
       });
+
+      const moneyStatusFilter = document.getElementById('moneyStatusFilter');
+      const moneyCategoryFilter = document.getElementById('moneyCategoryFilter');
+      const moneySearch = document.getElementById('moneySearch');
+      const shoppingPriorityFilter = document.getElementById('shoppingPriorityFilter');
+      if (moneyStatusFilter) {
+        moneyStatusFilter.addEventListener('change', () => {
+          moneyUI.status = moneyStatusFilter.value || 'all';
+          renderMoney();
+        });
+      }
+      if (moneyCategoryFilter) {
+        moneyCategoryFilter.addEventListener('change', () => {
+          moneyUI.category = moneyCategoryFilter.value || 'all';
+          renderMoney();
+        });
+      }
+      if (moneySearch) {
+        moneySearch.addEventListener('input', () => {
+          moneyUI.search = moneySearch.value.trim();
+          renderMoney();
+        });
+      }
+      if (shoppingPriorityFilter) {
+        shoppingPriorityFilter.addEventListener('change', () => {
+          moneyUI.priority = shoppingPriorityFilter.value || 'all';
+          renderMoney();
+        });
+      }
+
+      const addShoppingBtn = document.getElementById('addShopping');
+      if (addShoppingBtn) {
+        addShoppingBtn.addEventListener('click', () => {
+          ensureShoppingState();
+          const nameInput = document.getElementById('shopName');
+          const categoryInput = document.getElementById('shopCategory');
+          const planInput = document.getElementById('shopPlan');
+          const priorityInput = document.getElementById('shopPriority');
+          const dueInput = document.getElementById('shopDue');
+          const vendorInput = document.getElementById('shopVendor');
+          const name = nameInput.value.trim();
+          if (!name) {
+            alert('品目名を入力してください');
+            nameInput.focus();
+            return;
+          }
+          state.shopping.push({
+            id: `s-${Date.now()}-${Math.floor(Math.random() * 999)}`,
+            name,
+            category: categoryInput.value.trim(),
+            priority: ['高', '中', '低'].includes(priorityInput.value) ? priorityInput.value : '中',
+            plan: Number(planInput.value || 0),
+            actual: 0,
+            status: '未定',
+            due: dueInput.value || '',
+            vendor: vendorInput.value.trim()
+          });
+          nameInput.value = '';
+          categoryInput.value = '';
+          planInput.value = '';
+          priorityInput.value = '高';
+          dueInput.value = '';
+          vendorInput.value = '';
+          saveState();
+          renderMoney();
+          renderCards();
+          renderGuide();
+        });
+      }
+
+      const shoppingBody = document.querySelector('#shoppingTable tbody');
+      if (shoppingBody) {
+        const updateShoppingRow = (e) => {
+          const tr = e.target.closest('tr[data-i]');
+          if (!tr) return;
+          const i = Number(tr.dataset.i);
+          const k = e.target.dataset.k;
+          if (!k) return;
+          if (!state.shopping[i]) return;
+          if (k === 'plan' || k === 'actual') {
+            state.shopping[i][k] = Number(e.target.value || 0);
+          } else {
+            state.shopping[i][k] = e.target.value;
+          }
+          saveState();
+          if (k === 'category') renderMoneyFilters();
+          renderMoneySummary();
+          renderCards();
+          renderGuide();
+        };
+        shoppingBody.addEventListener('input', updateShoppingRow);
+        shoppingBody.addEventListener('change', updateShoppingRow);
+
+        shoppingBody.addEventListener('click', (e) => {
+          if (e.target.dataset.act !== 'del') return;
+          const tr = e.target.closest('tr[data-i]');
+          if (!tr) return;
+          state.shopping.splice(Number(tr.dataset.i), 1);
+          saveState();
+          renderMoney();
+          renderCards();
+          renderGuide();
+        });
+      }
 
       document.getElementById('addDispose').addEventListener('click', () => {
         state.dispose.push({ name: '', size: '', fee: 0, status: '未予約', date: '' });
