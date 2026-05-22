@@ -235,7 +235,7 @@ function attachEvents() {
     setCloudStatus(syncConfig.autoSync ? "自動クラウド保存: ON" : "自動クラウド保存: OFF");
     if (syncConfig.autoSync) scheduleCloudSync();
   });
-  refs.cloudToken.addEventListener("change", () => {
+  refs.cloudToken.addEventListener("input", () => {
     syncConfig.token = refs.cloudToken.value.trim();
     if (syncConfig.autoSync && syncConfig.token) scheduleCloudSync();
   });
