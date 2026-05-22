@@ -1571,6 +1571,70 @@
       font-weight: 700;
     }
 
+    .risk-strip {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .risk-chip {
+      border: 1px solid #cec6b8;
+      background: #f8f4ec;
+      color: #3b352f;
+      border-radius: 12px;
+      min-height: 58px;
+      padding: 8px 10px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform .16s ease, border-color .16s ease, background-color .16s ease;
+    }
+
+    .risk-chip .risk-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .risk-chip .risk-name {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .01em;
+    }
+
+    .risk-chip .risk-num {
+      font-size: 20px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.02em;
+    }
+
+    .risk-chip:hover {
+      transform: translateY(-1px);
+      border-color: #908573;
+      background: #f2ece1;
+    }
+
+    .risk-chip.warn {
+      border-color: #be8a81;
+      background: #fbf2f0;
+      animation: chipPulse 1.2s ease-in-out infinite;
+    }
+
+    .risk-chip.action {
+      background: #ece6da;
+      border-color: #8f816e;
+    }
+
+    .risk-chip.action .risk-name {
+      font-size: 13px;
+    }
+
+    .risk-chip.action .risk-num {
+      display: none;
+    }
+
     .hud-grid {
       display: grid;
       gap: 8px;
@@ -1689,10 +1753,21 @@
       display: none;
     }
 
+    body.visual-mode #guidePanel,
+    body.visual-mode .strategy-current p.muted {
+      display: none;
+    }
+
     @keyframes hudPulse {
       0% { box-shadow: 0 0 0 0 rgba(184, 87, 68, .22); }
       70% { box-shadow: 0 0 0 8px rgba(184, 87, 68, 0); }
       100% { box-shadow: 0 0 0 0 rgba(184, 87, 68, 0); }
+    }
+
+    @keyframes chipPulse {
+      0% { box-shadow: 0 0 0 0 rgba(191, 122, 111, .2); }
+      70% { box-shadow: 0 0 0 8px rgba(191, 122, 111, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(191, 122, 111, 0); }
     }
 
     @keyframes nodeIn {
@@ -1716,6 +1791,7 @@
       .strategy-layout { grid-template-columns: 1fr; }
       .money-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .money-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .risk-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .hud-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       #planCanvas { min-height: 680px; height: 76vh; max-height: 960px; }
     }
@@ -1731,6 +1807,7 @@
       .strategy-actions { grid-template-columns: 1fr; }
       .money-summary { grid-template-columns: 1fr; }
       .money-filters { grid-template-columns: 1fr; }
+      .risk-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .hud-grid { grid-template-columns: 1fr; }
       .plan-actions { grid-template-columns: 1fr; }
     }
@@ -1777,8 +1854,8 @@
       <div class="guide-top">
         <div>
           <div class="guide-kicker">進行ガイド</div>
-          <h2 class="guide-title" id="guideTitle">最優先アクションを自動提示</h2>
-          <p class="guide-sub" id="guideSubtitle">このサイトは「期限→配置→費用→共有」の順で進める設計です。</p>
+          <h2 class="guide-title" id="guideTitle">いまやる1手</h2>
+          <p class="guide-sub" id="guideSubtitle">期限 → 配置 → 費用 → 共有</p>
         </div>
         <div class="guide-progress">
           <div class="guide-progress-text" id="guideProgressText">進捗 0%</div>
@@ -1789,18 +1866,18 @@
     </section>
 
     <section class="tabs" id="tabs">
-      <button class="tab active" data-tab="strategy">戦略</button>
-      <button class="tab" data-tab="plan">レイアウト</button>
+      <button class="tab" data-tab="strategy">図解</button>
+      <button class="tab active" data-tab="plan">配置</button>
       <button class="tab" data-tab="money">費用</button>
       <button class="tab" data-tab="dispose">処分</button>
       <button class="tab" data-tab="schedule">日程</button>
       <button class="tab" data-tab="notes">共有</button>
     </section>
 
-    <section id="sec-strategy" class="section active">
+    <section id="sec-strategy" class="section">
       <div class="panel block">
         <h2>プロジェクト戦略マップ</h2>
-        <p class="muted">段階を選んで進める形式です。現在位置を決めると、買う物・予算・次アクションを自動で提案します。</p>
+        <p class="muted">段階を選ぶだけで、次に触る画面が決まります。</p>
 
         <div class="strategy-layout">
           <div class="strategy-map" id="strategyMap">
@@ -1871,7 +1948,7 @@
       </div>
     </section>
 
-    <section id="sec-plan" class="section">
+    <section id="sec-plan" class="section active">
       <div class="panel block">
         <div class="layout-title">
           <h2>配置</h2>
@@ -1881,7 +1958,7 @@
         <div class="plan-stage-head">
           <div class="quick-room" id="roomScope">
             <button class="btn active" data-room-scope="living">LDK</button>
-            <button class="btn" data-room-scope="bedroom">寝室</button>
+            <button class="btn" data-room-scope="bedroom">寝室＋収納</button>
             <button class="btn" data-room-scope="roof">バルコニー</button>
           </div>
 
@@ -1889,6 +1966,33 @@
             <button class="view-toggle active" id="toggleDoors">ドア</button>
             <button class="view-toggle active" id="toggleClosets">収納</button>
             <button class="view-toggle active" id="toggleLabels">ラベル</button>
+          </div>
+
+          <div class="risk-strip" id="riskStrip">
+            <button class="risk-chip" id="jumpDoorRisk">
+              <span class="risk-icon">🚪</span>
+              <span class="risk-name">ドア</span>
+              <span class="risk-num" id="chipDoorRisk">0</span>
+            </button>
+            <button class="risk-chip" id="jumpClosetRisk">
+              <span class="risk-icon">🧺</span>
+              <span class="risk-name">収納</span>
+              <span class="risk-num" id="chipClosetRisk">0</span>
+            </button>
+            <button class="risk-chip" id="jumpOverlapRisk">
+              <span class="risk-icon">⬛</span>
+              <span class="risk-name">重なり</span>
+              <span class="risk-num" id="chipOverlapRisk">0</span>
+            </button>
+            <button class="risk-chip" id="jumpBoundaryRisk">
+              <span class="risk-icon">📐</span>
+              <span class="risk-name">範囲外</span>
+              <span class="risk-num" id="chipBoundaryRisk">0</span>
+            </button>
+            <button class="risk-chip action" id="autoFixRoom">
+              <span class="risk-icon">✨</span>
+              <span class="risk-name">自動整理</span>
+            </button>
           </div>
 
           <div class="hud-grid" id="planHud">
@@ -2077,7 +2181,7 @@
     <section id="sec-money" class="section">
       <div class="panel block">
         <h2>買い物とお金管理</h2>
-        <p class="muted">「買うもの」と「費用」を同時に管理します。状態を切り替えると、予算差額と不足項目がすぐ見える構成です。</p>
+        <p class="muted">買い物と費用を一緒に管理。</p>
 
         <div class="money-summary" id="moneySummaryCards"></div>
 
@@ -2320,7 +2424,7 @@
       notes: '',
       shareBaseUrl: '',
       savedAt: '',
-      layoutVersion: 2,
+      layoutVersion: 3,
       ui: {
         visualMode: true
       },
@@ -2602,7 +2706,7 @@
 
     const canvas = document.getElementById('planCanvas');
     const ctx = canvas.getContext('2d');
-    const LAYOUT_SCHEMA_VERSION = 2;
+    const LAYOUT_SCHEMA_VERSION = 3;
     const planOverlayUI = {
       showDoors: true,
       showClosets: true,
@@ -2736,15 +2840,24 @@
       if (!state || typeof state !== 'object') return;
       if (!state.ui || typeof state.ui !== 'object') state.ui = { visualMode: true };
       if (typeof state.ui.visualMode !== 'boolean') state.ui.visualMode = true;
-      if (Number(state.layoutVersion || 0) >= LAYOUT_SCHEMA_VERSION) return;
+      const oldVersion = Number(state.layoutVersion || 0);
+      const migrated = oldVersion < LAYOUT_SCHEMA_VERSION;
+      let changed = false;
 
-      const bed = Array.isArray(state.items) ? state.items.find((it) => it.id === 'bed') : null;
-      if (bed) {
-        Object.assign(bed, { x: 96, z: 626, w: 140, d: 188 });
+      if (migrated) {
+        const bed = Array.isArray(state.items) ? state.items.find((it) => it.id === 'bed') : null;
+        if (bed) {
+          Object.assign(bed, { x: 96, z: 626, w: 140, d: 188 });
+          changed = true;
+        }
+      }
+
+      for (const roomKey of ['living', 'bedroom', 'roof']) {
+        changed = ensureRoomLayoutSafe(roomKey, 8) || changed;
       }
 
       state.layoutVersion = LAYOUT_SCHEMA_VERSION;
-      saveState({ skipCloud: true });
+      if (migrated || changed) saveState({ skipCloud: true });
     }
 
     function loadState() {
@@ -3014,7 +3127,9 @@
 
     function diagnostics(roomKey = null) {
       const collisions = [];
+      const collisionPairs = [];
       const boundary = [];
+      const boundaryIds = [];
       const structureHits = [];
       const target = roomKey || getActiveRoomKey();
       const roomItems = state.items.filter((it) => it.zone === target);
@@ -3022,7 +3137,10 @@
 
       for (let i = 0; i < roomItems.length; i++) {
         const a = roomItems[i];
-        if (!isInsideZone(a)) boundary.push(a.name);
+        if (!isInsideZone(a)) {
+          boundary.push(a.name);
+          boundaryIds.push(a.id);
+        }
         for (const s of structures) {
           if (overlaps(a, s)) {
             structureHits.push({
@@ -3035,10 +3153,18 @@
         }
         for (let j = i + 1; j < roomItems.length; j++) {
           const b = roomItems[j];
-          if (overlaps(a, b)) collisions.push(`${a.name} x ${b.name}`);
+          if (overlaps(a, b)) {
+            collisions.push(`${a.name} x ${b.name}`);
+            collisionPairs.push({
+              aId: a.id,
+              bId: b.id,
+              aName: a.name,
+              bName: b.name
+            });
+          }
         }
       }
-      return { collisions, boundary, structureHits };
+      return { collisions, collisionPairs, boundary, boundaryIds, structureHits };
     }
 
     function isValidPlacement(item, roomKey, ignoreId = null) {
@@ -3075,13 +3201,59 @@
       return best;
     }
 
+    function ensureRoomLayoutSafe(roomKey, maxPasses = 6) {
+      let changed = false;
+      for (let pass = 0; pass < maxPasses; pass++) {
+        let movedInPass = false;
+        const roomItems = state.items
+          .filter((it) => it.zone === roomKey)
+          .sort((a, b) => (b.w * b.d) - (a.w * a.d));
+
+        for (const item of roomItems) {
+          if (isValidPlacement(item, roomKey, item.id)) continue;
+          const safe = findSafeSpotForItem(item, roomKey);
+          if (!safe) continue;
+          if (item.x !== safe.x || item.z !== safe.z) {
+            item.x = safe.x;
+            item.z = safe.z;
+            movedInPass = true;
+            changed = true;
+          }
+        }
+        if (!movedInPass) break;
+      }
+      return changed;
+    }
+
+    function focusRisk(kind) {
+      const roomKey = getActiveRoomKey();
+      const diag = diagnostics(roomKey);
+      const idToIndex = new Map(getRoomItemsWithIndex(roomKey).map(({ item, idx }) => [item.id, idx]));
+      let targetId = '';
+
+      if (kind === 'door') {
+        targetId = diag.structureHits.find((h) => h.kind === 'door')?.itemId || '';
+      } else if (kind === 'closet') {
+        targetId = diag.structureHits.find((h) => h.kind === 'closet')?.itemId || '';
+      } else if (kind === 'boundary') {
+        targetId = diag.boundaryIds[0] || '';
+      } else if (kind === 'overlap') {
+        targetId = diag.collisionPairs[0]?.aId || '';
+      }
+
+      if (!targetId || !idToIndex.has(targetId)) return false;
+      selectItem(idToIndex.get(targetId));
+      return true;
+    }
+
     function nudgeSelectedToSafeSpot() {
       const item = state.items[selectedIndex];
       if (!item) return false;
       const roomKey = item.zone;
-      const hit = diagnostics(roomKey).structureHits.some((h) => h.itemId === item.id);
-      const crowd = state.items.some((other) => other.zone === roomKey && other.id !== item.id && overlaps(item, other));
-      const bad = hit || crowd || !isInsideZone(item);
+      const diag = diagnostics(roomKey);
+      const hit = diag.structureHits.some((h) => h.itemId === item.id);
+      const crowd = diag.collisionPairs.some((pair) => pair.aId === item.id || pair.bId === item.id);
+      const bad = hit || crowd || diag.boundaryIds.includes(item.id);
       if (!bad) return false;
       const safe = findSafeSpotForItem(item, roomKey);
       if (!safe) return false;
@@ -3201,33 +3373,48 @@
       const y = Math.min(p1.y, p2.y);
       const w = Math.abs(p2.x - p1.x);
       const h = Math.abs(p2.y - p1.y);
+      const minThickness = style.minThickness || 7;
+      let drawX = x;
+      let drawY = y;
+      let drawW = w;
+      let drawH = h;
+      if (drawW < minThickness) {
+        const cx = drawX + drawW / 2;
+        drawW = minThickness;
+        drawX = cx - drawW / 2;
+      }
+      if (drawH < minThickness) {
+        const cy = drawY + drawH / 2;
+        drawH = minThickness;
+        drawY = cy - drawH / 2;
+      }
 
       ctx.fillStyle = style.fill;
       ctx.strokeStyle = style.stroke;
       ctx.lineWidth = style.lineWidth || 1.4;
-      ctx.fillRect(x, y, w, h);
+      ctx.fillRect(drawX, drawY, drawW, drawH);
       if (style.hatch) {
-        drawHatch(x, y, w, h, style.hatchGap || 7, style.hatch);
+        drawHatch(drawX, drawY, drawW, drawH, style.hatchGap || 7, style.hatch);
       }
-      ctx.strokeRect(x, y, w, h);
+      ctx.strokeRect(drawX, drawY, drawW, drawH);
 
-      if (planOverlayUI.showLabels && Math.max(w, h) > 24) {
+      if (planOverlayUI.showLabels && Math.max(drawW, drawH) > 22) {
         ctx.fillStyle = style.text;
         ctx.font = 'bold 10px "Avenir Next", "Hiragino Kaku Gothic ProN", sans-serif';
-        ctx.fillText(part.name, x + 3, y + 12);
+        ctx.fillText(part.name, drawX + 3, drawY + 12);
       }
 
       if (style.kind === 'door') {
-        ctx.strokeStyle = 'rgba(145, 84, 13, .62)';
+        ctx.strokeStyle = 'rgba(88, 72, 52, .72)';
         ctx.lineWidth = 1.2;
         ctx.setLineDash([3, 2]);
         ctx.beginPath();
-        if (w >= h) {
-          ctx.moveTo(x, y + h);
-          ctx.lineTo(x + w, y + h);
+        if (drawW >= drawH) {
+          ctx.moveTo(drawX, drawY + drawH);
+          ctx.lineTo(drawX + drawW, drawY + drawH);
         } else {
-          ctx.moveTo(x + w, y);
-          ctx.lineTo(x + w, y + h);
+          ctx.moveTo(drawX + drawW, drawY);
+          ctx.lineTo(drawX + drawW, drawY + drawH);
         }
         ctx.stroke();
         ctx.setLineDash([]);
@@ -3241,12 +3428,13 @@
       if (planOverlayUI.showDoors) {
         parts.doors.forEach((door) => {
           drawStructureRect(door, {
-            fill: 'rgba(245,158,11,.28)',
-            stroke: 'rgba(217,119,6,.98)',
-            text: '#92400e',
-            hatch: 'rgba(180,83,9,.33)',
+            fill: 'rgba(118, 98, 72, .24)',
+            stroke: 'rgba(88, 72, 52, .95)',
+            text: '#4e3f2d',
+            hatch: 'rgba(88, 72, 52, .22)',
             hatchGap: 6,
             lineWidth: 1.5,
+            minThickness: 9,
             kind: 'door'
           });
         });
@@ -3255,12 +3443,13 @@
       if (planOverlayUI.showClosets) {
         parts.closets.forEach((closet) => {
           drawStructureRect(closet, {
-            fill: 'rgba(139,92,246,.24)',
-            stroke: 'rgba(109,40,217,.95)',
-            text: '#4c1d95',
-            hatch: 'rgba(76,29,149,.28)',
+            fill: 'rgba(83, 115, 101, .24)',
+            stroke: 'rgba(61, 92, 78, .95)',
+            text: '#2f5646',
+            hatch: 'rgba(50, 78, 66, .28)',
             hatchGap: 8,
             lineWidth: 1.6,
+            minThickness: 8,
             kind: 'closet'
           });
         });
@@ -3383,8 +3572,8 @@
 
       function stateText(item) {
         const issues = [];
-        if (diag.boundary.includes(item.name)) issues.push('範囲外');
-        if (diag.collisions.some((c) => c.includes(item.name))) issues.push('重なり');
+        if (diag.boundaryIds.includes(item.id)) issues.push('範囲外');
+        if (diag.collisionPairs.some((pair) => pair.aId === item.id || pair.bId === item.id)) issues.push('重なり');
         const kinds = diag.structureHits.filter((h) => h.itemId === item.id).map((h) => h.kind);
         if (kinds.includes('door')) issues.push('ドア干渉');
         if (kinds.includes('closet')) issues.push('収納干渉');
@@ -3409,6 +3598,7 @@
       const closetHits = diag.structureHits.filter((h) => h.kind === 'closet').length;
       const totalRisk = diag.collisions.length + diag.structureHits.length + diag.boundary.length;
       const boundary = diag.boundary.length;
+      const overlaps = diag.collisions.length;
 
       const totalEl = document.getElementById('hudTotalRisk');
       const doorEl = document.getElementById('hudDoorRisk');
@@ -3427,6 +3617,28 @@
       if (doorHits > 0 && doorEl?.parentElement) doorEl.parentElement.classList.add('warn');
       if (closetHits > 0 && closetEl?.parentElement) closetEl.parentElement.classList.add('warn');
       if (boundary > 0 && boundEl?.parentElement) boundEl.parentElement.classList.add('warn');
+
+      const chips = {
+        door: document.getElementById('jumpDoorRisk'),
+        closet: document.getElementById('jumpClosetRisk'),
+        overlap: document.getElementById('jumpOverlapRisk'),
+        boundary: document.getElementById('jumpBoundaryRisk')
+      };
+      const chipValues = {
+        door: document.getElementById('chipDoorRisk'),
+        closet: document.getElementById('chipClosetRisk'),
+        overlap: document.getElementById('chipOverlapRisk'),
+        boundary: document.getElementById('chipBoundaryRisk')
+      };
+      if (chipValues.door) chipValues.door.textContent = String(doorHits);
+      if (chipValues.closet) chipValues.closet.textContent = String(closetHits);
+      if (chipValues.overlap) chipValues.overlap.textContent = String(overlaps);
+      if (chipValues.boundary) chipValues.boundary.textContent = String(boundary);
+      Object.values(chips).forEach((chip) => chip?.classList.remove('warn'));
+      if (doorHits > 0) chips.door?.classList.add('warn');
+      if (closetHits > 0) chips.closet?.classList.add('warn');
+      if (overlaps > 0) chips.overlap?.classList.add('warn');
+      if (boundary > 0) chips.boundary?.classList.add('warn');
     }
 
     function getTodayIsoDate() {
@@ -4357,6 +4569,7 @@
       state.activeRoom = roomKey;
       photoRoomFilter = roomKey;
       ensureSelectedInActiveRoom();
+      ensureRoomLayoutSafe(roomKey, 6);
       saveState();
       document.querySelectorAll('#roomScope .btn').forEach((b) => b.classList.toggle('active', b.dataset.roomScope === roomKey));
       document.querySelectorAll('#photoFilters .btn').forEach((b) => b.classList.toggle('active', b.dataset.room === roomKey));
@@ -4433,6 +4646,13 @@
 
       canvas.addEventListener('pointerup', endDrag);
       canvas.addEventListener('pointercancel', endDrag);
+      canvas.addEventListener('dblclick', () => {
+        const moved = nudgeSelectedToSafeSpot();
+        if (!moved) return;
+        saveState();
+        renderAll();
+        flashGuideTarget('planCanvas');
+      });
     }
 
     function bindLiveScene() {
@@ -4798,6 +5018,30 @@
         saveState();
         renderAll();
       });
+
+      [
+        ['jumpDoorRisk', 'door'],
+        ['jumpClosetRisk', 'closet'],
+        ['jumpOverlapRisk', 'overlap'],
+        ['jumpBoundaryRisk', 'boundary']
+      ].forEach(([id, kind]) => {
+        const node = document.getElementById(id);
+        if (!node) return;
+        node.addEventListener('click', () => {
+          const focused = focusRisk(kind);
+          if (focused) flashGuideTarget('planCanvas');
+        });
+      });
+
+      const autoFixBtn = document.getElementById('autoFixRoom');
+      if (autoFixBtn) {
+        autoFixBtn.addEventListener('click', () => {
+          const changed = ensureRoomLayoutSafe(getActiveRoomKey(), 8);
+          if (!changed) return;
+          saveState();
+          renderAll();
+        });
+      }
 
       document.querySelector('#itemTable tbody').addEventListener('click', (e) => {
         if (e.target.dataset.act !== 'sel') return;
