@@ -1,4 +1,13 @@
 const STORAGE_KEY = "hikkoshi_checklist_state_v2";
+const SYNC_CONFIG_KEY = "hikkoshi_checklist_cloud_sync_v1";
+const GITHUB_API_VERSION = "2022-11-28";
+const REMOTE_SYNC = {
+  owner: "newage08",
+  repo: "hikkoshi-planner-602-private",
+  branch: "main",
+  path: "hikkoshi-checklist/shared/checklist_state.json",
+};
+const REMOTE_CONTENTS_URL = `https://api.github.com/repos/${REMOTE_SYNC.owner}/${REMOTE_SYNC.repo}/contents/${REMOTE_SYNC.path}`;
 
 const CATEGORY_ORDER = [
   "日程",
@@ -77,7 +86,10 @@ const DEFAULT_TASKS = [
 ];
 
 const state = loadState();
+const syncConfig = loadSyncConfig();
 let filter = "all";
+let cloudSyncTimer = null;
+let cloudSyncInFlight = false;
 
 const refs = {
   board: document.getElementById("taskBoard"),
@@ -100,6 +112,13 @@ const refs = {
   moveDate: document.getElementById("moveDate"),
   leaveDate: document.getElementById("leaveDate"),
   deadlineHint: document.getElementById("deadlineHint"),
+  cloudToken: document.getElementById("cloudToken"),
+  cloudAutoSync: document.getElementById("cloudAutoSync"),
+  cloudSaveBtn: document.getElementById("cloudSaveBtn"),
+  cloudLoadBtn: document.getElementById("cloudLoadBtn"),
+  cloudRememberBtn: document.getElementById("cloudRememberBtn"),
+  cloudForgetBtn: document.getElementById("cloudForgetBtn"),
+  cloudSyncStatus: document.getElementById("cloudSyncStatus"),
 };
 
 init();
@@ -108,7 +127,13 @@ function init() {
   fillCategorySelect();
   attachEvents();
   hydrateDates();
+  hydrateCloudSyncUI();
   render();
+  if (syncConfig.autoSync && syncConfig.token) {
+    syncCloudOnBoot().catch((error) => {
+      setCloudStatus(`クラウド同期初期化に失敗: ${error.message}`, true);
+    });
+  }
 }
 
 function loadState() {
@@ -120,6 +145,7 @@ function loadState() {
       moveDate: "",
       leaveDate: "",
     },
+    savedAt: "",
   };
 
   try {
@@ -132,14 +158,41 @@ function loadState() {
     mergedDates.contractDate = FIXED_SCHEDULE.contractDate;
     mergedDates.keyDate = FIXED_SCHEDULE.keyDate;
 
-    return { tasks: saved.tasks, dates: mergedDates };
+    return { tasks: saved.tasks, dates: mergedDates, savedAt: saved.savedAt || "" };
   } catch {
     return empty;
   }
 }
 
-function saveState() {
+function loadSyncConfig() {
+  const empty = {
+    token: "",
+    autoSync: false,
+    lastSyncedAt: "",
+  };
+  try {
+    const saved = JSON.parse(localStorage.getItem(SYNC_CONFIG_KEY));
+    if (!saved || typeof saved !== "object") return empty;
+    return {
+      token: typeof saved.token === "string" ? saved.token : "",
+      autoSync: Boolean(saved.autoSync),
+      lastSyncedAt: typeof saved.lastSyncedAt === "string" ? saved.lastSyncedAt : "",
+    };
+  } catch {
+    return empty;
+  }
+}
+
+function saveSyncConfig() {
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(syncConfig));
+}
+
+function saveState(options = {}) {
+  state.savedAt = new Date().toISOString();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  if (!options.skipCloud && syncConfig.autoSync) {
+    scheduleCloudSync();
+  }
 }
 
 function fillCategorySelect() {
@@ -172,6 +225,20 @@ function attachEvents() {
   refs.exportBtn.addEventListener("click", exportState);
   refs.importInput.addEventListener("change", importState);
   refs.resetBtn.addEventListener("click", resetState);
+  refs.cloudSaveBtn.addEventListener("click", () => syncToCloud("manual"));
+  refs.cloudLoadBtn.addEventListener("click", pullFromCloud);
+  refs.cloudRememberBtn.addEventListener("click", rememberCloudToken);
+  refs.cloudForgetBtn.addEventListener("click", forgetCloudToken);
+  refs.cloudAutoSync.addEventListener("change", () => {
+    syncConfig.autoSync = refs.cloudAutoSync.checked;
+    saveSyncConfig();
+    setCloudStatus(syncConfig.autoSync ? "自動クラウド保存: ON" : "自動クラウド保存: OFF");
+    if (syncConfig.autoSync) scheduleCloudSync();
+  });
+  refs.cloudToken.addEventListener("change", () => {
+    syncConfig.token = refs.cloudToken.value.trim();
+    if (syncConfig.autoSync && syncConfig.token) scheduleCloudSync();
+  });
 
   ["moveDate", "leaveDate"].forEach((key) => {
     refs[key].addEventListener("change", () => {
@@ -190,6 +257,16 @@ function hydrateDates() {
   refs.moveDate.value = state.dates.moveDate || "";
   refs.leaveDate.value = state.dates.leaveDate || "";
   renderDeadlineHint();
+}
+
+function hydrateCloudSyncUI() {
+  refs.cloudToken.value = syncConfig.token || "";
+  refs.cloudAutoSync.checked = Boolean(syncConfig.autoSync);
+  if (syncConfig.lastSyncedAt) {
+    setCloudStatus(`最終クラウド保存: ${formatDateTime(syncConfig.lastSyncedAt)}`);
+  } else {
+    setCloudStatus("クラウド同期: 未設定");
+  }
 }
 
 function renderDeadlineHint() {
@@ -303,6 +380,14 @@ function addTask() {
   render();
 }
 
+function getStateSnapshot() {
+  return {
+    tasks: state.tasks,
+    dates: normalizedDates(state.dates),
+    savedAt: state.savedAt || new Date().toISOString(),
+  };
+}
+
 function exportState() {
   downloadJson(state, `hikkoshi-check-${todayText()}.json`);
 }
@@ -338,11 +423,7 @@ function resetState() {
 }
 
 function exportGitSharedState() {
-  const payload = {
-    tasks: state.tasks,
-    dates: normalizedDates(state.dates),
-    savedAt: new Date().toISOString(),
-  };
+  const payload = getStateSnapshot();
   downloadJson(payload, "checklist_state.json");
 }
 
@@ -361,10 +442,11 @@ async function loadGitSharedState() {
   }
 }
 
-function applyImportedState(data) {
+function applyImportedState(data, options = {}) {
   state.tasks = data.tasks;
   state.dates = normalizedDates(data.dates || {});
-  saveState();
+  state.savedAt = data.savedAt || new Date().toISOString();
+  saveState({ skipCloud: Boolean(options.skipCloud) });
   hydrateDates();
   render();
 }
@@ -388,11 +470,215 @@ function downloadJson(payload, filename) {
   URL.revokeObjectURL(url);
 }
 
+function rememberCloudToken() {
+  syncConfig.token = refs.cloudToken.value.trim();
+  if (!syncConfig.token) {
+    setCloudStatus("トークンが空です。", true);
+    return;
+  }
+  saveSyncConfig();
+  setCloudStatus("トークンを保存しました。");
+  if (syncConfig.autoSync) scheduleCloudSync();
+}
+
+function forgetCloudToken() {
+  syncConfig.token = "";
+  syncConfig.autoSync = false;
+  refs.cloudToken.value = "";
+  refs.cloudAutoSync.checked = false;
+  saveSyncConfig();
+  setCloudStatus("トークンを削除しました。");
+}
+
+function scheduleCloudSync() {
+  if (!syncConfig.autoSync || !syncConfig.token) return;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(() => {
+    syncToCloud("auto").catch((error) => {
+      setCloudStatus(`自動保存に失敗: ${error.message}`, true);
+    });
+  }, 900);
+}
+
+async function syncCloudOnBoot() {
+  setCloudStatus("クラウド同期を確認中...");
+  const remote = await fetchRemoteState(syncConfig.token);
+  if (!remote?.payload) {
+    await syncToCloud("bootstrap");
+    return;
+  }
+
+  const remoteStamp = Date.parse(remote.payload.savedAt || "");
+  const localStamp = Date.parse(state.savedAt || "");
+  if (Number.isFinite(remoteStamp) && (!Number.isFinite(localStamp) || remoteStamp > localStamp)) {
+    applyImportedState(remote.payload, { skipCloud: true });
+    setCloudStatus(`クラウド最新を反映: ${formatDateTime(remote.payload.savedAt)}`);
+    return;
+  }
+  await syncToCloud("bootstrap");
+}
+
+async function pullFromCloud() {
+  if (!syncConfig.token) {
+    setCloudStatus("先にGitHub Tokenを設定してください。", true);
+    return;
+  }
+  setCloudStatus("クラウドから読込中...");
+  try {
+    const remote = await fetchRemoteState(syncConfig.token);
+    if (!remote?.payload) {
+      setCloudStatus("クラウド側に保存データがありません。", true);
+      return;
+    }
+    applyImportedState(remote.payload, { skipCloud: true });
+    setCloudStatus(`クラウド復元完了: ${formatDateTime(remote.payload.savedAt)}`);
+  } catch (error) {
+    setCloudStatus(`クラウド復元失敗: ${error.message}`, true);
+  }
+}
+
+async function syncToCloud(reason = "manual") {
+  if (!syncConfig.token) {
+    setCloudStatus("先にGitHub Tokenを設定してください。", true);
+    return;
+  }
+  if (cloudSyncInFlight) return;
+
+  cloudSyncInFlight = true;
+  setCloudStatus("クラウドへ保存中...");
+  try {
+    const snapshot = getStateSnapshot();
+    const remote = await fetchRemoteState(syncConfig.token);
+    await upsertRemoteState(syncConfig.token, snapshot, remote?.sha || null, reason);
+    syncConfig.lastSyncedAt = new Date().toISOString();
+    saveSyncConfig();
+    setCloudStatus(`クラウド保存完了: ${formatDateTime(syncConfig.lastSyncedAt)}`);
+  } catch (error) {
+    setCloudStatus(`クラウド保存失敗: ${error.message}`, true);
+    throw error;
+  } finally {
+    cloudSyncInFlight = false;
+  }
+}
+
+function getGitHubHeaders(token) {
+  return {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github+json",
+    "Content-Type": "application/json",
+    "X-GitHub-Api-Version": GITHUB_API_VERSION,
+  };
+}
+
+async function fetchRemoteState(token) {
+  const url = `${REMOTE_CONTENTS_URL}?ref=${encodeURIComponent(REMOTE_SYNC.branch)}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: getGitHubHeaders(token),
+    cache: "no-store",
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    const message = await parseGitHubError(response);
+    throw new Error(message);
+  }
+
+  const data = await response.json();
+  if (!data.content) return { sha: data.sha || null, payload: null };
+  const decoded = fromBase64Utf8(String(data.content).replace(/\n/g, ""));
+  return {
+    sha: data.sha || null,
+    payload: JSON.parse(decoded),
+  };
+}
+
+async function upsertRemoteState(token, payload, sha, reason) {
+  const commitMessage = reason === "manual"
+    ? "chore: save checklist state from web app"
+    : "chore: autosave checklist state from web app";
+  const body = {
+    message: commitMessage,
+    content: toBase64Utf8(JSON.stringify(payload, null, 2)),
+    branch: REMOTE_SYNC.branch,
+  };
+  if (sha) body.sha = sha;
+
+  const response = await fetch(REMOTE_CONTENTS_URL, {
+    method: "PUT",
+    headers: getGitHubHeaders(token),
+    body: JSON.stringify(body),
+  });
+
+  if (response.status === 409) {
+    // 競合時は最新SHAを取り直して1回だけ再試行
+    const latest = await fetchRemoteState(token);
+    const retryBody = { ...body, sha: latest?.sha || undefined };
+    const retry = await fetch(REMOTE_CONTENTS_URL, {
+      method: "PUT",
+      headers: getGitHubHeaders(token),
+      body: JSON.stringify(retryBody),
+    });
+    if (!retry.ok) {
+      const message = await parseGitHubError(retry);
+      throw new Error(message);
+    }
+    return;
+  }
+
+  if (!response.ok) {
+    const message = await parseGitHubError(response);
+    throw new Error(message);
+  }
+}
+
+async function parseGitHubError(response) {
+  try {
+    const data = await response.json();
+    if (typeof data?.message === "string" && data.message) return `${response.status}: ${data.message}`;
+  } catch {
+    // ignore parse failure
+  }
+  return `${response.status}: GitHub API error`;
+}
+
+function toBase64Utf8(text) {
+  const bytes = new TextEncoder().encode(text);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary);
+}
+
+function fromBase64Utf8(base64Text) {
+  const binary = atob(base64Text);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function setCloudStatus(text, isError = false) {
+  refs.cloudSyncStatus.textContent = text;
+  refs.cloudSyncStatus.style.color = isError ? "#b42318" : "";
+}
+
 function formatDate(date) {
   const y = date.getFullYear();
   const m = `${date.getMonth() + 1}`.padStart(2, "0");
   const d = `${date.getDate()}`.padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+function formatDateTime(isoText) {
+  if (!isoText) return "-";
+  const d = new Date(isoText);
+  if (Number.isNaN(d.getTime())) return "-";
+  const y = d.getFullYear();
+  const m = `${d.getMonth() + 1}`.padStart(2, "0");
+  const day = `${d.getDate()}`.padStart(2, "0");
+  const hh = `${d.getHours()}`.padStart(2, "0");
+  const mm = `${d.getMinutes()}`.padStart(2, "0");
+  const ss = `${d.getSeconds()}`.padStart(2, "0");
+  return `${y}-${m}-${day} ${hh}:${mm}:${ss}`;
 }
 
 function todayText() {

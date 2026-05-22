@@ -88,6 +88,25 @@
 
       <section class="panel tools">
         <h2>Git共同チェック / 保守</h2>
+        <p class="hint">
+          端末にだけ保存だと消えるリスクがあるため、下のクラウド同期を必ず有効化してください。
+        </p>
+        <div class="cloud-grid">
+          <label>GitHub Token（repo権限）
+            <input id="cloudToken" type="password" placeholder="github_pat_..." autocomplete="off" />
+          </label>
+          <label class="switch-label">
+            <input id="cloudAutoSync" type="checkbox" />
+            <span>変更ごとにクラウドへ自動保存</span>
+          </label>
+        </div>
+        <div class="tool-buttons" style="margin-top:8px;">
+          <button id="cloudSaveBtn" class="primary">クラウド保存</button>
+          <button id="cloudLoadBtn">クラウド復元</button>
+          <button id="cloudRememberBtn">トークン保存</button>
+          <button id="cloudForgetBtn" class="danger">トークン削除</button>
+        </div>
+        <p id="cloudSyncStatus" class="hint">クラウド同期: 未設定</p>
         <div class="tool-buttons">
           <button id="exportGitBtn">Git共有JSON書き出し</button>
           <button id="loadGitBtn">Git共有JSON読込</button>
