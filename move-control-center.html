@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Move Board 602</title>
+  <title>引っ越しポータル 602</title>
   <style>
     :root {
       --ink: #111827;
@@ -1025,6 +1025,266 @@
       100% { box-shadow: 0 0 0 14px rgba(10, 132, 255, 0); }
     }
 
+    /* Minimal design override */
+    :root {
+      --ink: #2f2b27;
+      --ink-soft: #655f57;
+      --line: #d8d2c8;
+      --panel: #fbfaf7;
+      --panel-strong: #fbfaf7;
+      --brand: #5f5547;
+      --brand-2: #5f5547;
+      --accent: #9b8e7f;
+      --ok: #466948;
+      --warn: #7f3f36;
+      --bg-a: #f4f1ea;
+      --bg-b: #f4f1ea;
+      --living: #ece6dc;
+      --bed: #e6eadf;
+      --balcony: #e1ddd6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      background: #f4f1ea !important;
+      color: var(--ink);
+      font-family: "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", "Noto Sans JP", sans-serif;
+    }
+
+    body::before, body::after,
+    .hero::after,
+    .card::before,
+    .canvas-wrap::after,
+    .live-stage::after,
+    .video-stage::after {
+      display: none !important;
+    }
+
+    .panel, .card, .timeline, .live-panel, .video-panel, .share-box, .cloud-box, .canvas-wrap, .tabs, .status, .guide-step,
+    .tab, .tab.active, .video-card, .photo-card, .share-link, .pill, input[type="text"], input[type="number"], input[type="date"], select, textarea, .btn {
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      border-radius: 8px !important;
+    }
+
+    .panel, .card, .timeline, .live-panel, .video-panel, .share-box, .cloud-box, .tabs, .status, .guide-step, .video-card, .photo-card, .share-link {
+      border: 1px solid var(--line) !important;
+      background: var(--panel) !important;
+    }
+
+    .panel:hover {
+      border-color: #c8c0b3 !important;
+    }
+
+    .hero h1 {
+      color: var(--ink) !important;
+      background: none !important;
+      letter-spacing: 0;
+    }
+
+    label {
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: #5f5a53;
+    }
+
+    .btn {
+      border: 1px solid #bcb5a8;
+      background: #f8f6f1;
+      color: #3c3832;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 12px;
+      transition: background-color .18s ease, color .18s ease, border-color .18s ease, transform .14s ease;
+    }
+
+    .btn.primary {
+      background: #5f5547;
+      color: #fff;
+      border-color: #5f5547;
+    }
+
+    .btn.warn {
+      background: #f6ece8;
+      color: #7f3f36;
+      border-color: #d5b6ae;
+    }
+
+    .btn:hover {
+      background: #efe9de;
+      border-color: #9f9485;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn.primary:hover {
+      background: #4d4438;
+      border-color: #4d4438;
+    }
+
+    .btn.warn:hover {
+      background: #f2e2dd;
+      border-color: #c99f95;
+    }
+
+    .tab {
+      background: #f4f1ea;
+      color: #615c54;
+      border: 1px solid #d5cec2;
+      transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+    }
+
+    .tab.active {
+      background: #fffdf8;
+      color: #2f2b27;
+      border-color: #bcb5a8;
+    }
+
+    .tab:hover {
+      background: #f0ebe1;
+      border-color: #c5bcaf;
+    }
+
+    .chip {
+      background: #f8f5ee;
+      border: 1px solid #d7d0c5;
+      color: #5d5750;
+      border-radius: 8px;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .guide, .hero, .meta {
+      background: var(--panel) !important;
+    }
+
+    .guide-kicker {
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .guide-step.primary, .room-scope .btn.active, .photo-tools .btn.active {
+      background: #f0ebe1 !important;
+      color: #2f2b27 !important;
+      border: 1px solid #c8bfb1 !important;
+    }
+
+    .guide-step {
+      transition: background-color .18s ease, border-color .18s ease, transform .14s ease;
+    }
+
+    .guide-step:hover {
+      background: #f2ede3 !important;
+      border-color: #bdb4a6 !important;
+      transform: translateY(-1px);
+    }
+
+    .guide-bar {
+      background: #e8e2d7;
+    }
+
+    .guide-bar span {
+      background: #857768;
+    }
+
+    .card .k {
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 11px;
+    }
+
+    .status.ok {
+      border-color: #c6d6c8;
+      background: #f4f8f3 !important;
+      color: #365d3b;
+    }
+
+    .status.warn {
+      border-color: #e0c3bd;
+      background: #fbf2f0 !important;
+      color: #7a3f36;
+    }
+
+    .timeline-row:hover {
+      background: #f4f1ea;
+    }
+
+    .card, .photo-card, .video-card {
+      transition: border-color .18s ease, transform .16s ease;
+    }
+
+    .card:hover, .photo-card:hover, .video-card:hover {
+      border-color: #bfb7a9 !important;
+      transform: translateY(-1px);
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+      transition: border-color .18s ease, background-color .18s ease;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+      border-color: #8f8374 !important;
+      box-shadow: 0 0 0 2px rgba(95, 85, 71, .14) !important;
+    }
+
+    .timeline-row.done {
+      background: #f0f4ed;
+    }
+
+    .timeline-row.urgent,
+    .timeline-row.soon,
+    .timeline-row.calm {
+      border-left-width: 2px;
+      border-left-style: solid;
+    }
+
+    .timeline-row.urgent { border-left-color: #be7d73; }
+    .timeline-row.soon { border-left-color: #b29c74; }
+    .timeline-row.calm { border-left-color: #a8aaa3; }
+
+    .live-stage, .video-stage {
+      background: #ece8df;
+      border-color: #d8d2c8;
+    }
+
+    .video-stage video {
+      background: #ece8df;
+      object-fit: contain;
+    }
+
+    .video-empty {
+      color: #5f5a53;
+      letter-spacing: 0;
+    }
+
+    .photo-cap {
+      background: #f8f5ee;
+      color: #5f5a53;
+    }
+
+    #planCanvas {
+      background: #f7f4ee;
+      border-color: #d8d2c8;
+    }
+
+    .tabs {
+      padding: 0;
+      gap: 6px;
+    }
+
+    .hero-row {
+      gap: 6px;
+    }
+
     @media (max-width: 1180px) {
       .top { grid-template-columns: 1fr; }
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1051,33 +1311,33 @@
   <div class="wrap">
     <div class="top">
       <section class="panel hero">
-        <h1>Home 602</h1>
-        <p class="hero-sub">Minimal move command center</p>
+        <h1>引っ越しポータル 602</h1>
+        <p class="hero-sub">引っ越し準備を一画面で管理</p>
         <div class="hero-row">
           <span class="chip">ル・リオン東京 602</span>
           <span class="chip">LDK 494 x 310</span>
-          <span class="chip">BED 238 x 216</span>
-          <span class="chip">ROOF 140 x 350</span>
-          <button class="btn primary" id="startGuide">Start</button>
+          <span class="chip">寝室 238 x 216</span>
+          <span class="chip">バルコニー 140 x 350</span>
+          <button class="btn primary" id="startGuide">開始</button>
           <button class="btn" id="openLegacy3d">3D</button>
-          <button class="btn" id="jumpShare">Share</button>
+          <button class="btn" id="jumpShare">共有</button>
         </div>
       </section>
 
       <section class="panel meta">
         <div>
-          <label for="moveDate">Move Date</label>
+          <label for="moveDate">引っ越し日</label>
           <input id="moveDate" type="date" />
         </div>
         <div>
-          <label for="budget">Budget (JPY)</label>
+          <label for="budget">予算（円）</label>
           <input id="budget" type="number" step="1000" min="0" />
         </div>
         <div>
-          <label for="projectName">Project</label>
+          <label for="projectName">案件名</label>
           <input id="projectName" type="text" />
         </div>
-        <button class="btn primary" id="saveTop">Save</button>
+        <button class="btn primary" id="saveTop">保存</button>
       </section>
     </div>
 
@@ -1086,12 +1346,12 @@
     <section class="panel guide" id="guidePanel">
       <div class="guide-top">
         <div>
-          <div class="guide-kicker">Focus Route</div>
+          <div class="guide-kicker">進行ガイド</div>
           <h2 class="guide-title" id="guideTitle">最優先アクションを自動提示</h2>
           <p class="guide-sub" id="guideSubtitle">このサイトは「期限→配置→費用→共有」の順で進める設計です。</p>
         </div>
         <div class="guide-progress">
-          <div class="guide-progress-text" id="guideProgressText">Progress 0%</div>
+          <div class="guide-progress-text" id="guideProgressText">進捗 0%</div>
           <div class="guide-bar"><span id="guideProgressBar"></span></div>
         </div>
       </div>
@@ -1099,23 +1359,23 @@
     </section>
 
     <section class="tabs" id="tabs">
-      <button class="tab active" data-tab="plan">Plan</button>
-      <button class="tab" data-tab="money">Cost</button>
-      <button class="tab" data-tab="dispose">Drop</button>
-      <button class="tab" data-tab="schedule">Flow</button>
-      <button class="tab" data-tab="notes">Share</button>
+      <button class="tab active" data-tab="plan">レイアウト</button>
+      <button class="tab" data-tab="money">費用</button>
+      <button class="tab" data-tab="dispose">処分</button>
+      <button class="tab" data-tab="schedule">日程</button>
+      <button class="tab" data-tab="notes">共有</button>
     </section>
 
     <section id="sec-plan" class="section active">
       <div class="panel block">
-        <h2>Layout</h2>
+        <h2>配置</h2>
 
         <div class="room-scope" id="roomScope">
-          <span class="muted" style="margin-right:4px;">Room</span>
+          <span class="muted" style="margin-right:4px;">表示範囲</span>
           <button class="btn active" data-room-scope="living">LDK</button>
-          <button class="btn" data-room-scope="bedroom">BED</button>
-          <button class="btn" data-room-scope="roof">ROOF</button>
-          <button class="btn" id="togglePlanFocus">Focus</button>
+          <button class="btn" data-room-scope="bedroom">寝室</button>
+          <button class="btn" data-room-scope="roof">バルコニー</button>
+          <button class="btn" id="togglePlanFocus">集中表示</button>
         </div>
 
         <div class="plan-layout">
@@ -1125,51 +1385,51 @@
             </div>
             <div class="legend">
               <span><i class="dot" style="background:var(--living)"></i>LDK</span>
-              <span><i class="dot" style="background:var(--bed)"></i>BED</span>
-              <span><i class="dot" style="background:var(--balcony)"></i>ROOF</span>
-              <span><i class="dot" style="background:#f59e0b"></i>DOOR</span>
-              <span><i class="dot" style="background:#8b5cf6"></i>CLOSET</span>
+              <span><i class="dot" style="background:var(--bed)"></i>寝室</span>
+              <span><i class="dot" style="background:var(--balcony)"></i>バルコニー</span>
+              <span><i class="dot" style="background:#f59e0b"></i>ドア</span>
+              <span><i class="dot" style="background:#8b5cf6"></i>クローゼット</span>
             </div>
           </div>
 
           <aside class="inspector">
             <div class="panel block" style="margin:0;">
-              <h2 style="font-size:14px;">Item</h2>
+              <h2 style="font-size:14px;">家具</h2>
               <div id="selectedName" style="font-weight:800;font-size:16px;margin-bottom:6px;">—</div>
-              <div class="mini" id="selectedZone">Room —</div>
-              <div class="mini" id="selectedSize">Size —</div>
+              <div class="mini" id="selectedZone">部屋 —</div>
+              <div class="mini" id="selectedSize">サイズ —</div>
 
               <div class="row2" style="margin-top:8px;">
                 <div>
-                  <label for="inputX">X</label>
+                  <label for="inputX">横(X)</label>
                   <input id="inputX" type="number" step="1" />
                 </div>
                 <div>
-                  <label for="inputZ">Z</label>
+                  <label for="inputZ">縦(Z)</label>
                   <input id="inputZ" type="number" step="1" />
                 </div>
               </div>
 
               <div class="row2" style="margin-top:8px;">
                 <div>
-                  <label for="inputW">W</label>
+                  <label for="inputW">幅(W)</label>
                   <input id="inputW" type="number" step="1" min="1" />
                 </div>
                 <div>
-                  <label for="inputD">D</label>
+                  <label for="inputD">奥行(D)</label>
                   <input id="inputD" type="number" step="1" min="1" />
                 </div>
               </div>
 
               <div class="row3" style="margin-top:8px;">
-                <button class="btn" id="applyItem">Save</button>
-                <button class="btn" id="rotateItem">Rotate</button>
-                <button class="btn warn" id="resetPlan">Reset</button>
+                <button class="btn" id="applyItem">保存</button>
+                <button class="btn" id="rotateItem">回転</button>
+                <button class="btn warn" id="resetPlan">初期化</button>
               </div>
             </div>
 
-            <div id="statusOverlap" class="status ok">Overlap 0</div>
-            <div id="statusBoundary" class="status ok">Outside 0</div>
+            <div id="statusOverlap" class="status ok">重なり 0</div>
+            <div id="statusBoundary" class="status ok">範囲外 0</div>
           </aside>
         </div>
 
@@ -1177,12 +1437,12 @@
           <table class="tbl" id="itemTable">
             <thead>
               <tr>
-                <th>Pick</th>
-                <th>Item</th>
-                <th>Room</th>
-                <th>Size</th>
-                <th>Pos</th>
-                <th>State</th>
+                <th>選択</th>
+                <th>家具</th>
+                <th>表示範囲</th>
+                <th>サイズ</th>
+                <th>座標</th>
+                <th>判定</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -1190,25 +1450,25 @@
         </div>
 
         <div style="margin-top:12px;">
-          <h2 style="font-size:15px;">Media</h2>
+          <h2 style="font-size:15px;">写真・動画</h2>
           <div class="photo-tools" id="photoFilters">
-            <button class="btn" data-room="plan">Plan</button>
+            <button class="btn" data-room="plan">レイアウト</button>
             <button class="btn active" data-room="living">LDK</button>
-            <button class="btn" data-room="bedroom">BED</button>
-            <button class="btn" data-room="roof">ROOF</button>
+            <button class="btn" data-room="bedroom">寝室</button>
+            <button class="btn" data-room="roof">バルコニー</button>
           </div>
 
           <div class="live-panel">
             <div class="live-head">
-              <div class="mini" id="liveMeta">Live View</div>
+              <div class="mini" id="liveMeta">実写重ね合わせ</div>
               <div class="live-tools">
                 <select id="livePhotoSelect"></select>
-                <button class="btn" id="openLiveOriginal">Open</button>
-                <button class="btn" id="resetLiveNudges">Nudge 0</button>
+                <button class="btn" id="openLiveOriginal">開く</button>
+                <button class="btn" id="resetLiveNudges">位置リセット</button>
               </div>
             </div>
             <div class="live-stage" id="liveStage">
-              <img id="liveStageImage" alt="Live View" loading="lazy" />
+              <img id="liveStageImage" alt="実写重ね合わせ" loading="lazy" />
               <div class="live-overlay" id="liveOverlay"></div>
             </div>
           </div>
@@ -1217,17 +1477,17 @@
 
           <div class="video-panel">
             <div class="video-head">
-              <div class="mini" id="videoMeta">Move Reel</div>
+              <div class="mini" id="videoMeta">動画プレビュー</div>
               <div class="live-tools">
                 <select id="liveVideoSelect"></select>
-                <button class="btn" id="openLiveVideo">Open</button>
-                <button class="btn warn" id="removeLiveVideo">Remove</button>
+                <button class="btn" id="openLiveVideo">開く</button>
+                <button class="btn warn" id="removeLiveVideo">削除</button>
               </div>
             </div>
 
             <div class="video-stage" id="videoStage">
               <video id="liveStageVideo" playsinline controls preload="metadata"></video>
-              <div class="video-empty" id="videoEmpty">No clip yet. Add a URL below.</div>
+              <div class="video-empty" id="videoEmpty">動画がありません。下でURLを追加してください。</div>
             </div>
 
             <div class="video-grid" id="videoGrid"></div>
@@ -1235,24 +1495,24 @@
             <div class="video-add">
               <div class="row3">
                 <div>
-                  <label for="videoRoom">Room</label>
+                  <label for="videoRoom">表示範囲</label>
                   <select id="videoRoom">
                     <option value="living">LDK</option>
-                    <option value="bedroom">BED</option>
-                    <option value="roof">ROOF</option>
+                    <option value="bedroom">寝室</option>
+                    <option value="roof">バルコニー</option>
                   </select>
                 </div>
                 <div>
-                  <label for="videoUrl">Video URL</label>
+                  <label for="videoUrl">動画URL</label>
                   <input id="videoUrl" type="text" placeholder="例: ./assets/videos/living-walkthrough.mp4" />
                 </div>
                 <div>
-                  <label for="videoCap">Label</label>
-                  <input id="videoCap" type="text" placeholder="例: LDK walkthrough" />
+                  <label for="videoCap">表示名</label>
+                  <input id="videoCap" type="text" placeholder="例: LDK 定点動画" />
                 </div>
               </div>
               <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn primary" id="addVideo">+ Video</button>
+                <button class="btn primary" id="addVideo">動画を追加</button>
               </div>
             </div>
           </div>
@@ -1262,16 +1522,16 @@
 
     <section id="sec-money" class="section">
       <div class="panel block">
-        <h2>Cost</h2>
+        <h2>費用</h2>
         <div style="overflow:auto;">
           <table class="tbl" id="moneyTable">
             <thead>
               <tr>
-                <th>Item</th>
-                <th>Type</th>
-                <th>JPY</th>
-                <th>Status</th>
-                <th>Note</th>
+                <th>家具</th>
+                <th>分類</th>
+                <th>金額（円）</th>
+                <th>状態</th>
+                <th>メモ</th>
                 <th></th>
               </tr>
             </thead>
@@ -1279,23 +1539,23 @@
           </table>
         </div>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn" id="addMoney">+ Item</button>
+          <button class="btn" id="addMoney">項目追加</button>
         </div>
       </div>
     </section>
 
     <section id="sec-dispose" class="section">
       <div class="panel block">
-        <h2>Drop</h2>
+        <h2>処分</h2>
         <div style="overflow:auto;">
           <table class="tbl" id="disposeTable">
             <thead>
               <tr>
-                <th>Item</th>
-                <th>Size</th>
-                <th>Fee</th>
-                <th>Status</th>
-                <th>Date</th>
+                <th>家具</th>
+                <th>サイズ</th>
+                <th>費用</th>
+                <th>状態</th>
+                <th>日付</th>
                 <th></th>
               </tr>
             </thead>
@@ -1303,85 +1563,85 @@
           </table>
         </div>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn" id="addDispose">+ Item</button>
+          <button class="btn" id="addDispose">項目追加</button>
         </div>
       </div>
     </section>
 
     <section id="sec-schedule" class="section">
       <div class="panel block">
-        <h2>Flow</h2>
+        <h2>日程</h2>
         <div class="timeline" id="timeline"></div>
 
         <div class="row3" style="margin-top:10px;">
           <div>
-            <label for="newTaskTitle">Task</label>
+            <label for="newTaskTitle">タスク</label>
             <input id="newTaskTitle" type="text" placeholder="例: ガス開栓を確定" />
           </div>
           <div>
-            <label for="newTaskDate">Due</label>
+            <label for="newTaskDate">期限</label>
             <input id="newTaskDate" type="date" />
           </div>
           <div>
-            <label for="newTaskOwner">Owner</label>
+            <label for="newTaskOwner">担当</label>
             <input id="newTaskOwner" type="text" placeholder="例: 自分" />
           </div>
         </div>
 
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn" id="addTask">+ Task</button>
+          <button class="btn" id="addTask">タスク追加</button>
         </div>
       </div>
     </section>
 
     <section id="sec-notes" class="section">
       <div class="panel block">
-        <h2>Share</h2>
+        <h2>共有</h2>
         <div class="row2">
           <div>
-            <label for="notes">Note</label>
+            <label for="notes">メモ</label>
             <textarea id="notes" placeholder="決定事項を短く記録"></textarea>
             <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn primary" id="saveNotes">Save</button>
+              <button class="btn primary" id="saveNotes">保存</button>
             </div>
           </div>
           <div>
-            <label for="shareBaseUrl">Base URL</label>
+            <label for="shareBaseUrl">共有先URL</label>
             <input id="shareBaseUrl" type="text" placeholder="例: https://example.pages.dev/move-control-center.html" />
             <div class="share-box">
               <div class="muted">状態共有リンク</div>
               <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn primary" id="buildShareLink">Build</button>
-                <button class="btn" id="copyShareLink">Copy</button>
+                <button class="btn primary" id="buildShareLink">リンク生成</button>
+                <button class="btn" id="copyShareLink">コピー</button>
               </div>
               <input id="shareLink" class="share-link" readonly value="" />
             </div>
 
             <div class="cloud-box">
-              <div class="muted">Cloud Save（端末消去でも復元）</div>
+              <div class="muted">クラウド保存（端末が変わっても復元）</div>
               <div class="cloud-grid">
                 <div>
-                  <label for="cloudToken">GitHub Token (repo)</label>
+                  <label for="cloudToken">GitHub トークン（repo 権限）</label>
                   <input id="cloudToken" type="password" placeholder="github_pat_..." autocomplete="off" />
                 </div>
                 <label class="cloud-toggle">
                   <input id="cloudAutoSync" type="checkbox" />
-                  <span>Auto Save</span>
+                  <span>自動保存</span>
                 </label>
               </div>
               <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn primary" id="cloudSaveNow">Save Cloud</button>
-                <button class="btn" id="cloudLoadNow">Load Cloud</button>
-                <button class="btn" id="cloudRemember">Remember Token</button>
-                <button class="btn warn" id="cloudForget">Forget Token</button>
+                <button class="btn primary" id="cloudSaveNow">クラウド保存</button>
+                <button class="btn" id="cloudLoadNow">クラウド読込</button>
+                <button class="btn" id="cloudRemember">トークン保存</button>
+                <button class="btn warn" id="cloudForget">トークン削除</button>
               </div>
-              <div class="mini" id="cloudStatus" style="margin-top:7px;">Cloud: Not configured</div>
+              <div class="mini" id="cloudStatus" style="margin-top:7px;">クラウド: 未設定</div>
             </div>
 
-            <label style="margin-top:10px;">Backup</label>
+            <label style="margin-top:10px;">バックアップ</label>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn" id="exportJson">Export</button>
-              <label class="btn" for="importJson">Import</label>
+              <button class="btn" id="exportJson">書き出し</button>
+              <label class="btn" for="importJson">読み込み</label>
               <input id="importJson" type="file" accept="application/json" style="display:none;" />
             </div>
           </div>
@@ -1409,7 +1669,7 @@
       notes: '',
       shareBaseUrl: '',
       savedAt: '',
-      activeRoom: 'living',
+      active部屋: 'living',
       selectedItemId: 'tv',
       items: [
         { id: 'tv', name: 'LOWYA TVスタンド', zone: 'living', x: 12, z: 220, w: 120, d: 33, color: '#f59e0b' },
@@ -1440,7 +1700,7 @@
       tasksDone: {},
       tasksExtra: [],
       photoScene: {
-        imageByRoom: {
+        imageBy部屋: {
           living: './assets/photos/living/living-real-room-reference.jpeg',
           bedroom: './assets/photos/bedroom/bedroom-main.jpeg',
           roof: './assets/photos/balcony/balcony-view-1.jpeg'
@@ -1452,7 +1712,7 @@
         }
       },
       videoScene: {
-        selectedByRoom: {
+        selectedBy部屋: {
           living: '',
           bedroom: '',
           roof: ''
@@ -1655,7 +1915,7 @@
       const srcImageByRoom = srcScene.imageByRoom || {};
       const srcNudges = srcScene.nudges || {};
       const photoScene = {
-        imageByRoom: {
+        imageBy部屋: {
           living: srcImageByRoom.living || defaultState.photoScene.imageByRoom.living,
           bedroom: srcImageByRoom.bedroom || defaultState.photoScene.imageByRoom.bedroom,
           roof: srcImageByRoom.roof || defaultState.photoScene.imageByRoom.roof
@@ -1671,7 +1931,7 @@
       const srcVideoByRoom = srcVideoScene.selectedByRoom || {};
       const srcVideoCustom = Array.isArray(srcVideoScene.custom) ? srcVideoScene.custom : [];
       const videoScene = {
-        selectedByRoom: {
+        selectedBy部屋: {
           living: typeof srcVideoByRoom.living === 'string' ? srcVideoByRoom.living : '',
           bedroom: typeof srcVideoByRoom.bedroom === 'string' ? srcVideoByRoom.bedroom : '',
           roof: typeof srcVideoByRoom.roof === 'string' ? srcVideoByRoom.roof : ''
@@ -1968,7 +2228,7 @@
         if (!isInsideZone(a)) boundary.push(a.name);
         for (let j = i + 1; j < roomItems.length; j++) {
           const b = roomItems[j];
-          if (overlaps(a, b)) collisions.push(`${a.name} × ${b.name}`);
+          if (overlaps(a, b)) collisions.push(`${a.name} x ${b.name}`);
         }
       }
       return { collisions, boundary };
@@ -2172,8 +2432,8 @@
       ensureSelectedInActiveRoom();
       const it = state.items[selectedIndex];
       document.getElementById('selectedName').textContent = it ? it.name : '—';
-      document.getElementById('selectedZone').textContent = it ? `Room: ${zones[it.zone]?.name || it.zone}` : 'Room: —';
-      document.getElementById('selectedSize').textContent = it ? `Size: ${it.w} x ${it.d}` : 'Size: —';
+      document.getElementById('selectedZone').textContent = it ? `部屋: ${zones[it.zone]?.name || it.zone}` : '部屋: —';
+      document.getElementById('selectedSize').textContent = it ? `サイズ: ${it.w} x ${it.d}` : 'サイズ: —';
 
       document.getElementById('inputX').value = it ? Math.round(it.x) : '';
       document.getElementById('inputZ').value = it ? Math.round(it.z) : '';
@@ -2184,10 +2444,10 @@
       const ov = document.getElementById('statusOverlap');
       const bd = document.getElementById('statusBoundary');
 
-      ov.textContent = diag.collisions.length ? `Overlap: ${diag.collisions.join(' / ')}` : 'Overlap: 0';
+      ov.textContent = diag.collisions.length ? `重なり: ${diag.collisions.join(' / ')}` : '重なり: 0';
       ov.className = diag.collisions.length ? 'status warn' : 'status ok';
 
-      bd.textContent = diag.boundary.length ? `Outside: ${diag.boundary.join(' / ')}` : 'Outside: 0';
+      bd.textContent = diag.boundary.length ? `範囲外: ${diag.boundary.join(' / ')}` : '範囲外: 0';
       bd.className = diag.boundary.length ? 'status warn' : 'status ok';
     }
 
@@ -2200,14 +2460,14 @@
 
       function stateText(item) {
         const issues = [];
-        if (diag.boundary.includes(item.name)) issues.push('Outside');
-        if (diag.collisions.some((c) => c.includes(item.name))) issues.push('Overlap');
-        return issues.length ? issues.join(' / ') : 'OK';
+        if (diag.boundary.includes(item.name)) issues.push('範囲外');
+        if (diag.collisions.some((c) => c.includes(item.name))) issues.push('重なり');
+        return issues.length ? issues.join(' / ') : '正常';
       }
 
       tbody.innerHTML = roomItems.map(({ item: it, idx }) => `
         <tr data-idx="${idx}" class="${idx===selectedIndex?'selected':''}">
-          <td><button class="btn" data-act="sel">Pick</button></td>
+          <td><button class="btn" data-act="sel">選択</button></td>
           <td>${escapeHtml(it.name)}</td>
           <td><span class="pill">${escapeHtml(zones[it.zone]?.name || it.zone)}</span></td>
           <td>${it.w} x ${it.d}</td>
@@ -2288,7 +2548,7 @@
 
       const s = getGuideStats();
       const progress = s.tasks.length ? Math.round((s.done / s.tasks.length) * 100) : 0;
-      progressText.textContent = `Task ${s.done}/${s.tasks.length} (${progress}%)`;
+      progressText.textContent = `進捗 ${s.done}/${s.tasks.length}（${progress}%）`;
       progressBar.style.width = `${progress}%`;
 
       let topTitle = `最優先: ${s.moveDayText} に向けて次の1手を実行`;
@@ -2303,14 +2563,14 @@
       subtitle.textContent = `導線: 期限 → 配置 → 費用 → 共有。 次タスク: ${nextTaskText}`;
 
       const step1 = !state.moveDate
-        ? { id: 'setup', label: '契約日を入力', note: 'Flowの期限を自動で並べる起点を作る' }
+        ? { id: 'setup', label: '契約日を入力', note: '日程の期限を自動で並べる起点を作る' }
         : s.overdue > 0
           ? { id: 'schedule', label: '期限超過を処理', note: `超過 ${s.overdue} 件を先に完了する` }
           : { id: 'schedule', label: '直近タスクを処理', note: s.soon > 0 ? `3日以内 ${s.soon} 件を進める` : '次のタスクを1件完了する' };
 
       const step2 = s.layoutIssues > 0
         ? { id: 'plan', label: '配置エラーを解消', note: `重なり ${s.collisionCount} / 範囲外 ${s.boundaryCount}` }
-        : { id: 'plan', label: '家具導線を固める', note: 'Planで配置とLive重ね合わせを確認' };
+        : { id: 'plan', label: '家具導線を固める', note: 'レイアウトで配置と実写重ね合わせを確認' };
 
       const step3 = s.delta < 0
         ? { id: 'money', label: '予算超過を削る', note: `あと ${formatYen(Math.abs(s.delta))}円の調整が必要` }
@@ -2321,7 +2581,7 @@
 
       actionsBox.innerHTML = steps.map((step, idx) => `
         <button type="button" class="guide-step ${idx === 0 ? 'primary' : ''}" data-guide-action="${step.id}">
-          <span class="guide-step-num">STEP ${idx + 1}</span>
+          <span class="guide-step-num">手順 ${idx + 1}</span>
           <span class="guide-step-title">${escapeHtml(step.label)}</span>
           <span class="guide-step-note">${escapeHtml(step.note)}</span>
         </button>
@@ -2340,14 +2600,14 @@
       if (state.moveDate) dayText = s.moveDayText;
 
       document.getElementById('cards').innerHTML = `
-        <article class="card"><div class="k">Move Date</div><div class="v">${toDateLabel(state.moveDate)}</div><div class="sub">${dayText}</div></article>
-        <article class="card"><div class="k">Fixed</div><div class="v">${formatYen(s.fixed)}円</div><div class="sub">Paid</div></article>
-        <article class="card"><div class="k">Pending</div><div class="v">${formatYen(s.pending)}円</div><div class="sub">Draft</div></article>
-        <article class="card"><div class="k">Delta</div><div class="v" style="color:${s.delta>=0?'#166534':'#b91c1c'}">${formatYen(s.delta)}円</div><div class="sub">${s.delta>=0?'Within':'Over'}</div></article>
-        <article class="card"><div class="k">Tasks</div><div class="v">${s.done}/${s.tasks.length}</div><div class="sub">Open ${s.open}</div></article>
-        <article class="card"><div class="k">Drop</div><div class="v">${state.dispose.length}</div><div class="sub">${state.dispose.filter((x)=>x.status!=='完了').length} Open</div></article>
-        <article class="card"><div class="k">Items</div><div class="v">${activeCount}</div><div class="sub">${escapeHtml(zones[activeRoom].name)} / All ${state.items.length}</div></article>
-        <article class="card"><div class="k">Project</div><div class="v" style="font-size:17px;">${escapeHtml(state.projectName||'—')}</div><div class="sub">Editable</div></article>
+        <article class="card"><div class="k">引っ越し日</div><div class="v">${toDateLabel(state.moveDate)}</div><div class="sub">${dayText}</div></article>
+        <article class="card"><div class="k">確定費用</div><div class="v">${formatYen(s.fixed)}円</div><div class="sub">支払予定</div></article>
+        <article class="card"><div class="k">未確定費用</div><div class="v">${formatYen(s.pending)}円</div><div class="sub">見積中</div></article>
+        <article class="card"><div class="k">予算差額</div><div class="v" style="color:${s.delta>=0?'#166534':'#b91c1c'}">${formatYen(s.delta)}円</div><div class="sub">${s.delta>=0?'予算内':'超過'}</div></article>
+        <article class="card"><div class="k">タスク進捗</div><div class="v">${s.done}/${s.tasks.length}</div><div class="sub">未完了 ${s.open}</div></article>
+        <article class="card"><div class="k">処分</div><div class="v">${state.dispose.length}</div><div class="sub">${state.dispose.filter((x)=>x.status!=='完了').length} 未完了</div></article>
+        <article class="card"><div class="k">家具数</div><div class="v">${activeCount}</div><div class="sub">${escapeHtml(zones[activeRoom].name)} / 全体 ${state.items.length}</div></article>
+        <article class="card"><div class="k">案件名</div><div class="v" style="font-size:17px;">${escapeHtml(state.projectName||'—')}</div><div class="sub">編集可能</div></article>
       `;
     }
 
@@ -2364,7 +2624,7 @@
             </select>
           </td>
           <td><input type="text" data-k="note" value="${escapeHtml(m.note||'')}"></td>
-          <td><button class="btn" data-act="del">Del</button></td>
+          <td><button class="btn" data-act="del">削除</button></td>
         </tr>
       `).join('');
     }
@@ -2382,7 +2642,7 @@
             </select>
           </td>
           <td><input type="date" data-k="date" value="${d.date||''}"></td>
-          <td><button class="btn" data-act="del">Del</button></td>
+          <td><button class="btn" data-act="del">削除</button></td>
         </tr>
       `).join('');
     }
@@ -2409,13 +2669,13 @@
           <div class="date">${t.due?toDateLabel(t.due):'—'}</div>
           <div>
             <div style="font-weight:700;">${escapeHtml(t.title)}</div>
-            ${t.custom?'<div class="muted"><span class="pill">Extra</span></div>':''}
+            ${t.custom?'<div class="muted"><span class="pill">追加</span></div>':''}
           </div>
           <div style="display:flex;gap:6px;align-items:center;justify-content:flex-end;">
             <label style="margin:0;display:flex;gap:4px;align-items:center;font-size:11px;color:#334155;">
-              <input type="checkbox" data-act="done" ${t.done?'checked':''}>Done
+              <input type="checkbox" data-act="done" ${t.done?'checked':''}>完了
             </label>
-            ${t.custom?'<button class="btn" data-act="del">Del</button>':''}
+            ${t.custom?'<button class="btn" data-act="del">削除</button>':''}
           </div>
         </div>
       `).join('');
@@ -2435,7 +2695,7 @@
       if (!list.length) {
         select.innerHTML = '';
         overlay.innerHTML = '';
-        meta.textContent = 'Live View';
+        meta.textContent = '実写重ね合わせ';
         return;
       }
 
@@ -2504,7 +2764,7 @@
         select.disabled = true;
         grid.innerHTML = '';
         removeBtn.disabled = true;
-        meta.textContent = 'Move Reel';
+        meta.textContent = '動画プレビュー';
         player.pause();
         player.removeAttribute('src');
         player.dataset.src = '';
@@ -2515,7 +2775,7 @@
 
       const currentSrc = getLiveVideoForRoom(roomKey);
       select.disabled = false;
-      select.innerHTML = list.map((v) => `<option value="${escapeHtml(v.src)}">${escapeHtml(v.cap || 'Video clip')}</option>`).join('');
+      select.innerHTML = list.map((v) => `<option value="${escapeHtml(v.src)}">${escapeHtml(v.cap || '動画')}</option>`).join('');
       select.value = list.some((v) => v.src === currentSrc) ? currentSrc : list[0].src;
       const resolvedSrc = select.value || list[0].src;
 
@@ -2528,13 +2788,13 @@
       const activeVideo = list.find((v) => v.src === resolvedSrc) || list[0];
       const isCustom = state.videoScene.custom.some((v) => v.room === roomKey && v.src === resolvedSrc);
       removeBtn.disabled = !isCustom;
-      meta.textContent = `${activeVideo.cap || 'Video clip'} ${player.videoWidth || '-'}x${player.videoHeight || '-'}`;
+      meta.textContent = `${activeVideo.cap || '動画'} ${player.videoWidth || '-'}x${player.videoHeight || '-'}`;
       empty.style.display = 'none';
 
       grid.innerHTML = list.map((v) => `
         <button type="button" class="video-card ${v.src === resolvedSrc ? 'selected' : ''}" data-src="${escapeHtml(v.src)}">
           <video src="${escapeHtml(v.src)}" muted playsinline preload="metadata"></video>
-          <div class="photo-cap">${escapeHtml(v.cap || 'Video clip')}</div>
+          <div class="photo-cap">${escapeHtml(v.cap || '動画')}</div>
         </button>
       `).join('');
     }
@@ -2572,10 +2832,10 @@
       if (cloudRefs.token) cloudRefs.token.value = syncConfig.token || '';
       if (cloudRefs.autoSync) cloudRefs.autoSync.checked = Boolean(syncConfig.autoSync);
       if (syncConfig.lastSyncedAt) {
-        setCloudStatus(`Cloud: synced ${formatDateTime(syncConfig.lastSyncedAt)}`);
+        setCloudStatus(`クラウド: 同期済み ${formatDateTime(syncConfig.lastSyncedAt)}`);
         return;
       }
-      setCloudStatus(syncConfig.token ? 'Cloud: token set' : 'Cloud: not configured');
+      setCloudStatus(syncConfig.token ? 'クラウド: トークン設定済み' : 'クラウド: 未設定');
     }
 
     function getStateSnapshot() {
@@ -2598,11 +2858,11 @@
     function rememberCloudToken() {
       syncConfig.token = cloudRefs.token?.value.trim() || '';
       if (!syncConfig.token) {
-        setCloudStatus('Cloud: token is empty', true);
+        setCloudStatus('クラウド: トークンが空です', true);
         return;
       }
       saveSyncConfig();
-      setCloudStatus('Cloud: token saved');
+      setCloudStatus('クラウド: トークンを保存しました');
       if (syncConfig.autoSync) scheduleCloudSync();
     }
 
@@ -2613,7 +2873,7 @@
       if (cloudRefs.token) cloudRefs.token.value = '';
       if (cloudRefs.autoSync) cloudRefs.autoSync.checked = false;
       saveSyncConfig();
-      setCloudStatus('Cloud: token removed');
+      setCloudStatus('クラウド: トークンを削除しました');
     }
 
     function scheduleCloudSync() {
@@ -2621,13 +2881,13 @@
       clearTimeout(cloudSyncTimer);
       cloudSyncTimer = setTimeout(() => {
         syncToCloud('auto').catch((error) => {
-          setCloudStatus(`Cloud autosave failed: ${error.message}`, true);
+          setCloudStatus(`クラウド自動保存に失敗: ${error.message}`, true);
         });
       }, 900);
     }
 
     async function syncCloudOnBoot() {
-      setCloudStatus('Cloud: checking latest...');
+      setCloudStatus('クラウド: 最新状態を確認中...');
       const remote = await fetchRemoteState(syncConfig.token);
       if (!remote?.payload) {
         await syncToCloud('bootstrap');
@@ -2637,7 +2897,7 @@
       const localStamp = Date.parse(state.savedAt || '');
       if (Number.isFinite(remoteStamp) && (!Number.isFinite(localStamp) || remoteStamp > localStamp)) {
         applyImportedState(remote.payload, { skipCloud: true });
-        setCloudStatus(`Cloud loaded latest: ${formatDateTime(remote.payload.savedAt)}`);
+        setCloudStatus(`クラウド: 最新を反映: ${formatDateTime(remote.payload.savedAt)}`);
         return;
       }
       await syncToCloud('bootstrap');
@@ -2646,45 +2906,45 @@
     async function pullFromCloud() {
       syncConfig.token = cloudRefs.token?.value.trim() || syncConfig.token || '';
       if (!syncConfig.token) {
-        setCloudStatus('Cloud: set token first', true);
+        setCloudStatus('クラウド: 先にトークンを入力してください', true);
         return;
       }
 
-      setCloudStatus('Cloud: loading...');
+      setCloudStatus('クラウド: 読み込み中...');
       try {
         const remote = await fetchRemoteState(syncConfig.token);
         if (!remote?.payload) {
-          setCloudStatus('Cloud: no saved data yet', true);
+          setCloudStatus('クラウド: 保存データがありません', true);
           return;
         }
         applyImportedState(remote.payload, { skipCloud: true });
         syncConfig.lastSyncedAt = remote.payload.savedAt || new Date().toISOString();
         saveSyncConfig();
-        setCloudStatus(`Cloud load complete: ${formatDateTime(syncConfig.lastSyncedAt)}`);
+        setCloudStatus(`クラウド: 読み込み完了: ${formatDateTime(syncConfig.lastSyncedAt)}`);
       } catch (error) {
-        setCloudStatus(`Cloud load failed: ${error.message}`, true);
+        setCloudStatus(`クラウド: 読み込み失敗: ${error.message}`, true);
       }
     }
 
     async function syncToCloud(reason = 'manual') {
       syncConfig.token = cloudRefs.token?.value.trim() || syncConfig.token || '';
       if (!syncConfig.token) {
-        setCloudStatus('Cloud: set token first', true);
+        setCloudStatus('クラウド: 先にトークンを入力してください', true);
         return;
       }
       if (cloudSyncInFlight) return;
 
       cloudSyncInFlight = true;
-      setCloudStatus('Cloud: saving...');
+      setCloudStatus('クラウド: 保存中...');
       try {
         const snapshot = getStateSnapshot();
         const remote = await fetchRemoteState(syncConfig.token);
         await upsertRemoteState(syncConfig.token, snapshot, remote?.sha || null, reason);
         syncConfig.lastSyncedAt = snapshot.savedAt || new Date().toISOString();
         saveSyncConfig();
-        setCloudStatus(`Cloud save complete: ${formatDateTime(syncConfig.lastSyncedAt)}`);
+        setCloudStatus(`クラウド: 保存完了: ${formatDateTime(syncConfig.lastSyncedAt)}`);
       } catch (error) {
-        setCloudStatus(`Cloud save failed: ${error.message}`, true);
+        setCloudStatus(`クラウド: 保存失敗: ${error.message}`, true);
         throw error;
       } finally {
         cloudSyncInFlight = false;
@@ -2816,9 +3076,9 @@
       const focusBtn = document.getElementById('togglePlanFocus');
       if (focusBtn) {
         focusBtn.classList.toggle('active', planFocus);
-        focusBtn.textContent = planFocus ? 'Back' : 'Focus';
+        focusBtn.textContent = planFocus ? '戻る' : '集中表示';
       }
-      document.title = `${state.projectName || 'Home 602'}`;
+      document.title = `${state.projectName || '引っ越しポータル 602'}`;
     }
 
     function renderAll() {
@@ -2893,7 +3153,7 @@
         switchTab('notes');
         const link = buildShareLinkValue();
         const input = document.getElementById('shareLink');
-        if (input) input.value = link || 'Base URL required';
+        if (input) input.value = link || '共有先URLを入力してください';
         setTimeout(() => flashGuideTarget('shareLink'), 100);
       }
     }
@@ -2903,7 +3163,7 @@
       const layout = document.querySelector('.plan-layout');
       if (layout) layout.classList.toggle('focus-canvas', planFocus);
       const btn = document.getElementById('togglePlanFocus');
-      if (btn) btn.textContent = planFocus ? 'Back' : 'Focus';
+      if (btn) btn.textContent = planFocus ? '戻る' : '集中表示';
       setCanvasSize();
       drawPlan();
     }
@@ -3132,7 +3392,7 @@
 
         ensureVideoScene();
         if (!state.videoScene.custom.some((v) => v.room === room && v.src === src)) {
-          const fallbackCap = src.split('/').pop() || 'Video clip';
+          const fallbackCap = src.split('/').pop() || '動画';
           state.videoScene.custom.push({
             id: `vid-${Date.now()}-${Math.floor(Math.random() * 999)}`,
             room,
@@ -3199,11 +3459,11 @@
           syncConfig.token = cloudRefs.token?.value.trim() || syncConfig.token || '';
           saveSyncConfig();
           if (syncConfig.autoSync) {
-            setCloudStatus('Cloud autosave: ON');
+            setCloudStatus('クラウド自動保存: ON');
             scheduleCloudSync();
           } else {
             clearTimeout(cloudSyncTimer);
-            setCloudStatus('Cloud autosave: OFF');
+            setCloudStatus('クラウド自動保存: OFF');
           }
         });
       }
@@ -3364,7 +3624,7 @@
 
       document.getElementById('buildShareLink').addEventListener('click', () => {
         const link = buildShareLinkValue();
-        document.getElementById('shareLink').value = link || 'Base URL required';
+        document.getElementById('shareLink').value = link || '共有先URLを入力してください';
       });
 
       document.getElementById('copyShareLink').addEventListener('click', async () => {
@@ -3375,7 +3635,7 @@
         }
         if (!input.value) return;
         const ok = await copyText(input.value);
-        if (!ok) alert('Copy failed');
+        if (!ok) alert('コピーに失敗しました');
       });
 
       document.getElementById('exportJson').addEventListener('click', () => {
@@ -3403,7 +3663,7 @@
           saveState();
           renderAll();
         } catch {
-          alert('Import failed');
+          alert('読み込みに失敗しました');
         }
         e.target.value = '';
       });
@@ -3444,7 +3704,7 @@
     renderAll();
     if (syncConfig.autoSync && syncConfig.token) {
       syncCloudOnBoot().catch((error) => {
-        setCloudStatus(`Cloud boot sync failed: ${error.message}`, true);
+        setCloudStatus(`クラウド初期同期に失敗: ${error.message}`, true);
       });
     }
   </script>
