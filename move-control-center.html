@@ -981,6 +981,79 @@
       word-break: break-all;
     }
 
+    .share-pack {
+      border: 1px solid rgba(17, 24, 39, .12);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .92);
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .share-pack-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .share-pack-grid {
+      margin-top: 8px;
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .share-pack-card {
+      border: 1px solid rgba(17, 24, 39, .12);
+      border-radius: 10px;
+      background: #fffdf8;
+      padding: 8px;
+      min-height: 140px;
+    }
+
+    .share-pack-card h3 {
+      margin: 0 0 6px;
+      font-size: 12px;
+      color: #4b3f31;
+    }
+
+    .share-pack-list {
+      margin: 0;
+      padding-left: 16px;
+      display: grid;
+      gap: 4px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #2f2b27;
+    }
+
+    .share-pack-shopping {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .share-pack-pill {
+      border: 1px solid #d7cbb7;
+      background: #f8f2e8;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 11px;
+      color: #4c4031;
+      line-height: 1.2;
+    }
+
+    .share-pack-text {
+      margin-top: 8px;
+      min-height: 188px;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      background: #fffefb;
+    }
+
     .cloud-box {
       margin-top: 10px;
       border: 1px solid rgba(17, 24, 39, .1);
@@ -1788,6 +1861,7 @@
       .guide-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .plan-layout { grid-template-columns: 1fr; }
       .cloud-grid { grid-template-columns: 1fr; }
+      .share-pack-grid { grid-template-columns: 1fr; }
       .strategy-layout { grid-template-columns: 1fr; }
       .money-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .money-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2359,6 +2433,37 @@
             <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
               <button class="btn primary" id="saveNotes">保存</button>
             </div>
+
+            <div class="share-pack" id="sharePack">
+              <div class="share-pack-head">
+                <div class="mini">即共有パック（6/12 / 6/13 / 当日）</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button class="btn" id="refreshSharePack">更新</button>
+                  <button class="btn primary" id="copySharePackText">本文コピー</button>
+                </div>
+              </div>
+
+              <div class="share-pack-grid">
+                <article class="share-pack-card">
+                  <h3 id="sharePackPrevLabel">前日準備</h3>
+                  <ol class="share-pack-list" id="sharePackPrevList"></ol>
+                </article>
+                <article class="share-pack-card">
+                  <h3 id="sharePackDay0Label">6/12 TODO</h3>
+                  <ol class="share-pack-list" id="sharePackDay0List"></ol>
+                </article>
+                <article class="share-pack-card">
+                  <h3 id="sharePackDay1Label">6/13 TODO</h3>
+                  <ol class="share-pack-list" id="sharePackDay1List"></ol>
+                </article>
+              </div>
+
+              <div class="mini" style="margin-top:8px;">高優先の買い物（未購入）</div>
+              <div class="share-pack-shopping" id="sharePackShopping"></div>
+
+              <label for="sharePackText" style="margin-top:10px;">送信用本文</label>
+              <textarea id="sharePackText" class="share-pack-text" readonly></textarea>
+            </div>
           </div>
           <div>
             <label for="shareBaseUrl">共有先URL</label>
@@ -2416,6 +2521,7 @@
       path: 'shared/move_control_center_state.json'
     };
     const REMOTE_CONTENTS_URL = `https://api.github.com/repos/${REMOTE_SYNC.owner}/${REMOTE_SYNC.repo}/contents/${REMOTE_SYNC.path}`;
+    const SHARE_FALLBACK_MOVE_DATE = '2026-06-12';
 
     const defaultState = {
       projectName: 'ル・リオン東京 602 引っ越し',
@@ -3105,6 +3211,127 @@
         if (!b.due) return -1;
         return a.due.localeCompare(b.due);
       });
+    }
+
+    function getShareAnchorDate() {
+      if (typeof state.moveDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(state.moveDate)) return state.moveDate;
+      return SHARE_FALLBACK_MOVE_DATE;
+    }
+
+    function compactTaskTitle(title) {
+      return String(title || '').replace(/^\[[^\]]+\]\s*/, '').trim();
+    }
+
+    function getUndoneTasksByDue(isoDate) {
+      return getTasks()
+        .filter((t) => t.due === isoDate && !t.done)
+        .sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    function renderShareTaskList(el, items, emptyText) {
+      if (!el) return;
+      if (!items.length) {
+        el.innerHTML = `<li class="muted">${escapeHtml(emptyText)}</li>`;
+        return;
+      }
+      el.innerHTML = items
+        .slice(0, 12)
+        .map((t) => `<li>${escapeHtml(compactTaskTitle(t.title))}</li>`)
+        .join('');
+    }
+
+    function formatShareShoppingLine(item) {
+      const ref = Number(item.actual || item.plan || 0);
+      const due = item.due ? toDateLabel(item.due) : '期限未設定';
+      const vendor = item.vendor ? ` / ${item.vendor}` : '';
+      return `${item.name}（${item.status}・${formatYen(ref)}円・${due}${vendor}）`;
+    }
+
+    function buildSharePackText(anchor, prevTasks, day0Tasks, day1Tasks, highPriorityShopping) {
+      const lines = [];
+      lines.push(`【引っ越し共有】${toDateLabel(anchor)}〜${toDateLabel(addDays(anchor, 1))}`);
+      lines.push('');
+
+      const blocks = [
+        { label: `前日準備 ${toDateLabel(addDays(anchor, -1))}`, tasks: prevTasks },
+        { label: `${toDateLabel(anchor)} TODO`, tasks: day0Tasks },
+        { label: `${toDateLabel(addDays(anchor, 1))} TODO`, tasks: day1Tasks }
+      ];
+
+      for (const block of blocks) {
+        lines.push(`■ ${block.label}`);
+        if (!block.tasks.length) {
+          lines.push('・未完了タスクなし');
+        } else {
+          block.tasks.slice(0, 12).forEach((task) => {
+            lines.push(`・${compactTaskTitle(task.title)}`);
+          });
+        }
+        lines.push('');
+      }
+
+      lines.push('■ 高優先の買い物（未購入）');
+      if (!highPriorityShopping.length) {
+        lines.push('・高優先の未購入はなし');
+      } else {
+        highPriorityShopping.slice(0, 10).forEach((item) => {
+          lines.push(`・${formatShareShoppingLine(item)}`);
+        });
+      }
+
+      lines.push('');
+      lines.push('■ 当日動き（固定）');
+      lines.push('1. 鍵受け取り→室内不具合写真→ガス開栓');
+      lines.push('2. 床掃除→保護マット→大型家具搬入');
+      lines.push('3. 猫の安全区画を先に作ってから開梱');
+      return lines.join('\n');
+    }
+
+    function renderSharePack() {
+      ensureShoppingState();
+      const anchor = getShareAnchorDate();
+      const dMinus1 = addDays(anchor, -1);
+      const dPlus1 = addDays(anchor, 1);
+
+      const prevTasks = getUndoneTasksByDue(dMinus1);
+      const day0Tasks = getUndoneTasksByDue(anchor);
+      const day1Tasks = getUndoneTasksByDue(dPlus1);
+
+      const highPriorityShopping = state.shopping
+        .filter((s) => s.priority === '高' && s.status !== '購入済')
+        .sort((a, b) => {
+          if (!a.due && !b.due) return 0;
+          if (!a.due) return 1;
+          if (!b.due) return -1;
+          return a.due.localeCompare(b.due);
+        });
+
+      const prevLabel = document.getElementById('sharePackPrevLabel');
+      const day0Label = document.getElementById('sharePackDay0Label');
+      const day1Label = document.getElementById('sharePackDay1Label');
+      if (prevLabel) prevLabel.textContent = `前日準備 ${toDateLabel(dMinus1)}`;
+      if (day0Label) day0Label.textContent = `${toDateLabel(anchor)} TODO`;
+      if (day1Label) day1Label.textContent = `${toDateLabel(dPlus1)} TODO`;
+
+      renderShareTaskList(document.getElementById('sharePackPrevList'), prevTasks, '前日タスクは完了');
+      renderShareTaskList(document.getElementById('sharePackDay0List'), day0Tasks, '当日タスクは完了');
+      renderShareTaskList(document.getElementById('sharePackDay1List'), day1Tasks, '翌日タスクは完了');
+
+      const shoppingBox = document.getElementById('sharePackShopping');
+      if (shoppingBox) {
+        if (!highPriorityShopping.length) {
+          shoppingBox.innerHTML = `<span class="share-pack-pill">高優先の未購入はなし</span>`;
+        } else {
+          shoppingBox.innerHTML = highPriorityShopping
+            .slice(0, 10)
+            .map((item) => `<span class="share-pack-pill">${escapeHtml(item.name)} / ${escapeHtml(item.status)} / ${formatYen(Number(item.actual || item.plan || 0))}円</span>`)
+            .join('');
+        }
+      }
+
+      const text = buildSharePackText(anchor, prevTasks, day0Tasks, day1Tasks, highPriorityShopping);
+      const textArea = document.getElementById('sharePackText');
+      if (textArea) textArea.value = text;
     }
 
     function overlaps(a, b) {
@@ -4486,6 +4713,7 @@
       renderMoney();
       renderDispose();
       renderTimeline();
+      renderSharePack();
       renderLiveScene();
       renderPhotos();
       renderVideos();
@@ -5249,6 +5477,18 @@
       document.getElementById('saveNotes').addEventListener('click', () => {
         state.notes = document.getElementById('notes').value;
         saveState();
+        renderSharePack();
+      });
+
+      document.getElementById('refreshSharePack').addEventListener('click', () => {
+        renderSharePack();
+      });
+
+      document.getElementById('copySharePackText').addEventListener('click', async () => {
+        const input = document.getElementById('sharePackText');
+        if (!input?.value) return;
+        const ok = await copyText(input.value);
+        if (!ok) alert('コピーに失敗しました');
       });
 
       document.getElementById('buildShareLink').addEventListener('click', () => {
